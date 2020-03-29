@@ -1,9 +1,12 @@
+import applicationLogic.Board;
+import applicationLogic.ConnectFour;
+import applicationLogic.exceptions.FullColumnException;
+import applicationLogic.exceptions.WrongColumnOrRowException;
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BoardSpec {
-
+public class ConnectFourSpec {
     private ConnectFour connectFour;
 
     @BeforeEach
@@ -38,25 +41,5 @@ public class BoardSpec {
         for (int i = 0; i < Board.ROWS; i++)
             connectFour.dropDisc(col, ConnectFour.FIRST_PLAYER);
         assertThrows(FullColumnException.class, () -> connectFour.dropDisc(col, ConnectFour.FIRST_PLAYER));
-    }
-
-    @Test
-    void whenTheGameStartsAndPlayerDropsDiscThenAnotherPlayerDrops() throws  WrongColumnOrRowException, FullColumnException {
-        connectFour.startGame();
-        char firstPlayer = connectFour.getCurrentPlayer();
-
-        int col = 0;
-        connectFour.nextTurn(col);
-        char secondPlayer = connectFour.getCurrentPlayer();
-
-        assertNotEquals(firstPlayer, secondPlayer);
-    }
-
-    @Test
-    void whenTheColumnIsFullThenReturnsProperString() {
-        int col = 0;
-        for (int i = 0; i < Board.ROWS; i++)
-            connectFour.nextTurn(col);
-        assertEquals(connectFour.COLUMN_IS_FULL, connectFour.nextTurn(col));
     }
 }
