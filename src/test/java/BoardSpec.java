@@ -25,7 +25,7 @@ public class BoardSpec {
     }
 
     @Test
-    void whenColumnIsNotFullThenDiscAddedAndIncrementCounter() throws WrongColumnOrRowException {
+    void whenColumnIsNotFullThenDiscAddedAndIncrementCounter() throws WrongColumnOrRowException, FullColumnException {
         int col = 0;
         connectFour.dropDisc(col, ConnectFour.FIRST_PLAYER);
         assertEquals(1, connectFour.getDroppedDiscsQty());
@@ -33,10 +33,30 @@ public class BoardSpec {
     }
 
     @Test
-    void whenColumnIsFullThenThrowException() throws WrongColumnOrRowException {
+    void whenColumnIsFullThenThrowException() throws WrongColumnOrRowException, FullColumnException {
         int col = 0;
         for (int i = 0; i < Board.ROWS; i++)
             connectFour.dropDisc(col, ConnectFour.FIRST_PLAYER);
         assertThrows(FullColumnException.class, () -> connectFour.dropDisc(col, ConnectFour.FIRST_PLAYER));
+    }
+
+    @Test
+    void whenTheGameStartsAndPlayerDropsDiscThenAnotherPlayerDrops() throws  WrongColumnOrRowException, FullColumnException {
+        connectFour.startGame();
+        char firstPlayer = connectFour.getCurrentPlayer();
+
+        int col = 0;
+        connectFour.nextTurn(col);
+        char secondPlayer = connectFour.getCurrentPlayer();
+
+        assertNotEquals(firstPlayer, secondPlayer);
+    }
+
+    @Test
+    void whenTheColumnIsFullThenReturnsProperString() {
+        int col = 0;
+        for (int i = 0; i < Board.ROWS; i++)
+            connectFour.nextTurn(col);
+        assertEquals(connectFour.COLUMN_IS_FULL, connectFour.nextTurn(col));
     }
 }

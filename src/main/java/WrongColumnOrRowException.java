@@ -1,7 +1,7 @@
 public class WrongColumnOrRowException extends Exception {
-    static String msg = "WRONG COLUMN OR ROW";
+    private static final String exceptionMsg = "WRONG COLUMN OR ROW";
 
     public WrongColumnOrRowException() {
-        super(msg);
+        super(exceptionMsg);
     }
 }
