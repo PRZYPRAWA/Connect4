@@ -16,13 +16,27 @@ public class BoardSpec {
         assertEquals(0, connectFour.getDroppedDiscsQty());
     }
 
-    @Test 
-    void whenPlayerSelectsWrongCloumnThenThrowException() {
+    @Test
+    void whenPlayerSelectsWrongColumnThenThrowException() {
         int col1 = -1;
         int col2 = 6;
-
-        assertThrows(WrongColumnOrRowException.class, () -> connectFour.dropDisc(col1));
-        assertThrows(WrongColumnOrRowException.class, () -> connectFour.dropDisc(col2));
+        assertThrows(WrongColumnOrRowException.class, () -> connectFour.dropDisc(col1, ConnectFour.FIRST_PLAYER));
+        assertThrows(WrongColumnOrRowException.class, () -> connectFour.dropDisc(col2, ConnectFour.SECOND_PLAYER));
     }
 
+    @Test
+    void whenColumnIsNotFullThenDiscAddedAndIncrementCounter() throws WrongColumnOrRowException {
+        int col = 0;
+        connectFour.dropDisc(col, ConnectFour.FIRST_PLAYER);
+        assertEquals(1, connectFour.getDroppedDiscsQty());
+        assertEquals(1, connectFour.getDiscsInColumnQty(col));
+    }
+
+    @Test
+    void whenColumnIsFullThenThrowException() throws WrongColumnOrRowException {
+        int col = 0;
+        for (int i = 0; i < Board.ROWS; i++)
+            connectFour.dropDisc(col, ConnectFour.FIRST_PLAYER);
+        assertThrows(FullColumnException.class, () -> connectFour.dropDisc(col, ConnectFour.FIRST_PLAYER));
+    }
 }
