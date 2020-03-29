@@ -1,18 +1,26 @@
-import java.lang.reflect.Array;
 import java.util.Arrays;
 
 public class Board {
-    private static final int ROWS = 7;
-    private static final int COLUMNS = 6;
+    public static final int ROWS = 7;
+    public static final int COLUMNS = 6;
     private char[][] board;
 
-    private char firstPlayer = 'r', secondPlayer = 'g', empty = 'o';
-
+    //----------------------------------------------------------------------------------------------------------------//
     public Board() {
         board = new char[ROWS][COLUMNS];
+        for (int i = 0; i < ROWS; i++) Arrays.fill(board[i], ConnectFour.EMPTY);
+    }
 
-        for (int i = 0; i < ROWS; i++) {
-            Arrays.fill(board[i], empty);
-        }
+
+    public int getDiscsInColumnQty(int col) {
+        int discsQty = 0;
+        for (int i = 0; i < ROWS; i++)
+            if (board[i][col] != ConnectFour.EMPTY)
+                discsQty++;
+        return discsQty;
+    }
+
+    public void dropDisc(int col, char player) {
+        board[getDiscsInColumnQty(col)][col] = player;
     }
 }
