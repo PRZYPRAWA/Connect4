@@ -16,5 +16,13 @@ public class BoardSpec {
         assertEquals(0, connectFour.getDroppedDiscsQty());
     }
 
+    @Test 
+    void whenPlayerSelectsWrongCloumnThenThrowException() {
+        int col1 = -1;
+        int col2 = 6;
+
+        assertThrows(WrongColumnOrRowException.class, () -> connectFour.dropDisc(col1));
+        assertThrows(WrongColumnOrRowException.class, () -> connectFour.dropDisc(col2));
+    }
 
 }

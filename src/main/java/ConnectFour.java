@@ -1,5 +1,6 @@
 public class ConnectFour {
     private Board board;
+    private int droppedDiscs = 0;
 
     //----------------------------------------------------------------------------------------------------------------//
     public ConnectFour() {
@@ -8,6 +9,10 @@ public class ConnectFour {
 
     //----------------------------------------------------------------------------------------------------------------//
     public int getDroppedDiscsQty() {
-        return -1;
+        return droppedDiscs;
+    }
+
+    public void dropDisc(int col) {
+
     }
 }
