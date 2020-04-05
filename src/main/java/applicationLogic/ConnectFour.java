@@ -10,7 +10,7 @@ public class ConnectFour {
     private int droppedDiscs = 0;
     private char currentPlayer;
 
-    public final static char FIRST_PLAYER = 'r', SECOND_PLAYER = 'g', EMPTY = 'o';
+    public final static char FIRST_PLAYER = 'r', SECOND_PLAYER = 'g', EMPTY = 'o', DRAW = 'd';
 
     //----------------------------------------------------------------------------------------------------------------//
     public ConnectFour() {
@@ -47,5 +47,14 @@ public class ConnectFour {
 
     public void changePlayer() {
         currentPlayer = currentPlayer == FIRST_PLAYER ? SECOND_PLAYER : FIRST_PLAYER;
+    }
+
+    public char getResult() {
+        int boardSize = Board.COLUMNS * Board.ROWS;
+        if (boardSize != droppedDiscs) {
+            return EMPTY;
+        } else {
+            return DRAW;
+        }
     }
 }

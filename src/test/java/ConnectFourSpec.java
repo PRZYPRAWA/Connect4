@@ -42,4 +42,16 @@ public class ConnectFourSpec {
             connectFour.dropDisc(col, ConnectFour.FIRST_PLAYER);
         assertThrows(FullColumnException.class, () -> connectFour.dropDisc(col, ConnectFour.FIRST_PLAYER));
     }
+
+    @Test
+    void whenNoMoreDiscsCanBeThrownTheGameShouldEndInDraw() throws WrongColumnOrRowException, FullColumnException {
+        int size = Board.COLUMNS * Board.ROWS;
+
+        for (int i = 0; i < Board.COLUMNS; i++)
+            for (int j = 0; j < Board.ROWS; j++)
+                connectFour.dropDisc(i, ConnectFour.FIRST_PLAYER);
+
+        assertEquals(connectFour.getDroppedDiscsQty(), size);
+        assertEquals(connectFour.getResult(), connectFour.DRAW);
+    }
 }
