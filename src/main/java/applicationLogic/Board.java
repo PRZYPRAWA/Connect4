@@ -6,6 +6,7 @@ public class Board {
     public static final int ROWS = 7;
     public static final int COLUMNS = 6;
     private char[][] board;
+    private int lastColumnDropIndex = -1;
 
     //----------------------------------------------------------------------------------------------------------------//
     public Board() {
@@ -24,5 +25,22 @@ public class Board {
 
     public void dropDisc(int col, char player) {
         board[getDiscsInColumnQty(col)][col] = player;
+        lastColumnDropIndex = col;
+    }
+
+    public int getLastDiscRow() {
+        for (int i = ROWS - 1; i >= 0; i--) {
+            if (board[i][lastColumnDropIndex] != ConnectFour.EMPTY)
+                return ROWS - i - 1;
+        }
+        return -1;
+    }
+
+    public char getSign(int row, int column) {
+        return board[ROWS - row - 1][column];
+    }
+
+    public int getLastColumnDropIndex() {
+        return lastColumnDropIndex;
     }
 }

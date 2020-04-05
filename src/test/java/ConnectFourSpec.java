@@ -54,4 +54,12 @@ public class ConnectFourSpec {
         assertEquals(connectFour.getDroppedDiscsQty(), size);
         assertEquals(connectFour.getResult(), connectFour.DRAW);
     }
+
+    @Test
+    void whenMoreThan3DiscsVerticalThenCurrentPlayerShouldWin() throws WrongColumnOrRowException, FullColumnException {
+        connectFour.setCurrentPlayer(ConnectFour.FIRST_PLAYER);
+        for (int i = 0; i < 4; i++)
+            connectFour.dropDisc(1, ConnectFour.FIRST_PLAYER);
+        assertEquals(ConnectFour.FIRST_PLAYER,connectFour.getResult());
+    }
 }
