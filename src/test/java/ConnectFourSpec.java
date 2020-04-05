@@ -60,6 +60,56 @@ public class ConnectFourSpec {
         connectFour.setCurrentPlayer(ConnectFour.FIRST_PLAYER);
         for (int i = 0; i < 4; i++)
             connectFour.dropDisc(1, ConnectFour.FIRST_PLAYER);
-        assertEquals(ConnectFour.FIRST_PLAYER,connectFour.getResult());
+        assertEquals(ConnectFour.FIRST_PLAYER, connectFour.getResult());
+    }
+
+    @Test
+    void whenDiscsAreNotInOneLineThenPlayerShouldNotWin() throws WrongColumnOrRowException, FullColumnException {
+        connectFour.setCurrentPlayer(ConnectFour.FIRST_PLAYER);
+        for (int i = 0; i < 2; i++)
+            connectFour.dropDisc(1, ConnectFour.FIRST_PLAYER);
+        connectFour.dropDisc(1, ConnectFour.SECOND_PLAYER);
+        for (int i = 0; i < 2; i++)
+            connectFour.dropDisc(1, ConnectFour.FIRST_PLAYER);
+
+        assertEquals(ConnectFour.EMPTY, connectFour.getResult());
+    }
+
+    @Test
+    void whenMoreThan3DiscsHorizontalFromLeftThenCurrentPlayerShouldWin() throws WrongColumnOrRowException, FullColumnException {
+        connectFour.setCurrentPlayer(ConnectFour.FIRST_PLAYER);
+        for (int i = 0; i < 4; i++)
+            connectFour.dropDisc(i, ConnectFour.FIRST_PLAYER);
+        assertEquals(ConnectFour.FIRST_PLAYER, connectFour.getResult());
+    }
+
+    @Test
+    void whenMoreThan3DiscsHorizontalFromRightThenCurrentPlayerShouldWin() throws WrongColumnOrRowException, FullColumnException {
+        connectFour.setCurrentPlayer(ConnectFour.FIRST_PLAYER);
+        for (int i = 0; i < 4; i++)
+            connectFour.dropDisc(Board.COLUMNS - i - 1, ConnectFour.FIRST_PLAYER);
+        assertEquals(ConnectFour.FIRST_PLAYER, connectFour.getResult());
+    }
+
+    @Test
+    void whenMoreThan3DiscsHorizontalInCenterThenCurrentPlayerShouldWin() throws WrongColumnOrRowException, FullColumnException {
+        connectFour.setCurrentPlayer(ConnectFour.FIRST_PLAYER);
+        for (int i = 0; i < 2; i++)
+            connectFour.dropDisc(i, ConnectFour.FIRST_PLAYER);
+        for (int i = 0; i < 2; i++)
+            connectFour.dropDisc(Board.COLUMNS - 2 - i, ConnectFour.FIRST_PLAYER);
+        connectFour.dropDisc(2, ConnectFour.FIRST_PLAYER);
+        assertEquals(ConnectFour.FIRST_PLAYER, connectFour.getResult());
+    }
+
+    @Test
+    void whenDiscsNotInHorizontalLinePlayerShouldNotWin() throws WrongColumnOrRowException, FullColumnException {
+        connectFour.setCurrentPlayer(ConnectFour.FIRST_PLAYER);
+        for (int i = 0; i < 2; i++)
+            connectFour.dropDisc(i, ConnectFour.FIRST_PLAYER);
+        connectFour.dropDisc(2, ConnectFour.SECOND_PLAYER);
+        for (int i = 3; i < 5; i++)
+            connectFour.dropDisc(i, ConnectFour.FIRST_PLAYER);
+        assertNotEquals(ConnectFour.FIRST_PLAYER, connectFour.getResult());
     }
 }

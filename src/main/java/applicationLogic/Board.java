@@ -40,7 +40,7 @@ public class Board {
         return board[ROWS - row - 1][column];
     }
 
-    public int getLastColumnDropIndex() {
+    public int getLastDiscColumn() {
         return lastColumnDropIndex;
     }
 }

@@ -63,14 +63,38 @@ public class ConnectFour {
         return droppedDiscs == Board.COLUMNS * Board.ROWS;
     }
 
-    private boolean isWin(char player) {
-        int verticalDiscs = 0;
-        for (int i = board.getLastDiscRow(); i < Board.ROWS; i++) {
-            if (board.getSign(i, board.getLastColumnDropIndex()) == player)
-                verticalDiscs++;
-            else return (verticalDiscs > 3);
+    public boolean isWin(char player) {
+        return isHorizontal(player) || isVertical(player);
+    }
+
+    private boolean isHorizontal(char player) {
+        int discAmount = 0;
+
+        int lastRow = board.getLastDiscRow();
+        int lastCol = board.getLastDiscColumn();
+
+        for (int i = lastCol; i < Board.COLUMNS; i++) {
+            if (board.getSign(lastRow, i) == player)
+                discAmount++;
+            else break;
         }
-        return (verticalDiscs > 3);
+        for (int i = lastCol - 1; i >= 0; i--) {
+            if (board.getSign(lastRow, i) == player)
+                discAmount++;
+            else break;
+        }
+
+        return discAmount > 3;
+    }
+
+    private boolean isVertical(char player) {
+        int discAmount = 0;
+        for (int i = board.getLastDiscRow(); i < Board.ROWS; i++) {
+            if (board.getSign(i, board.getLastDiscColumn()) == player)
+                discAmount++;
+            else return (discAmount > 3);
+        }
+        return (discAmount > 3);
     }
 
     public void setCurrentPlayer(char currentPlayer) {
