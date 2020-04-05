@@ -50,11 +50,30 @@ public class ConnectFour {
     }
 
     public char getResult() {
-        int boardSize = Board.COLUMNS * Board.ROWS;
-        if (boardSize != droppedDiscs) {
-            return EMPTY;
-        } else {
+        if (isWin(currentPlayer)) {
+            return currentPlayer;
+        } else if (boardIsFull()) {
             return DRAW;
+        } else {
+            return EMPTY;
         }
+    }
+
+    private boolean boardIsFull() {
+        return droppedDiscs == Board.COLUMNS * Board.ROWS;
+    }
+
+    private boolean isWin(char player) {
+        int verticalDiscs = 0;
+        for (int i = board.getLastDiscRow(); i < Board.ROWS; i++) {
+            if (board.getSign(i, board.getLastColumnDropIndex()) == player)
+                verticalDiscs++;
+            else return (verticalDiscs > 3);
+        }
+        return (verticalDiscs > 3);
+    }
+
+    public void setCurrentPlayer(char currentPlayer) {
+        this.currentPlayer = currentPlayer;
     }
 }
