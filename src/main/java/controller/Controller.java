@@ -10,14 +10,14 @@ public class Controller {
     private GameCli gameCli;
 
     //----------------------------------------------------------------------------------------------------------------//
+
     public Controller(ConnectFour gameLogic, GameCli gameCli) {
         this.gameLogic = gameLogic;
         this.gameCli = gameCli;
     }
 
-
-
     //----------------------------------------------------------------------------------------------------------------//
+
     public void nextTurn(int col) {
         try {
             gameLogic.dropDisc(col, gameLogic.getCurrentPlayer());

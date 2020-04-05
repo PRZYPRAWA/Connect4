@@ -4,6 +4,7 @@ import applicationLogic.exceptions.FullColumnException;
 import applicationLogic.exceptions.WrongColumnOrRowException;
 
 import java.util.Random;
+import java.util.function.Predicate;
 
 public class ConnectFour {
     private Board board;
@@ -13,11 +14,13 @@ public class ConnectFour {
     public final static char FIRST_PLAYER = 'r', SECOND_PLAYER = 'g', EMPTY = 'o', DRAW = 'd';
 
     //----------------------------------------------------------------------------------------------------------------//
+
     public ConnectFour() {
         this.board = new Board();
     }
 
     //----------------------------------------------------------------------------------------------------------------//
+
     public int getDroppedDiscsQty() {
         return droppedDiscs;
     }
@@ -50,13 +53,9 @@ public class ConnectFour {
     }
 
     public char getResult() {
-        if (isWin(currentPlayer)) {
+        if (isWin(currentPlayer))
             return currentPlayer;
-        } else if (boardIsFull()) {
-            return DRAW;
-        } else {
-            return EMPTY;
-        }
+        else return (boardIsFull()) ? DRAW : EMPTY;
     }
 
     private boolean boardIsFull() {
@@ -98,47 +97,32 @@ public class ConnectFour {
     }
 
     private boolean isDiagonal(char player) {
-        return isRightDiagonal(player) || isLeftDiagonal(player);
+        return isDiagonal(player, true) || isDiagonal(player, false);
     }
 
-    private boolean isRightDiagonal(char player) {
+    private boolean isDiagonal(char player, boolean isRight) {
         int actualRow = board.getLastDiscRow();
-        int discsQty = 0;
-        for (int column = board.getLastDiscColumn(); column < Board.COLUMNS && actualRow >= 0; column++) {
+        int discsAmount = 0;
+
+        Predicate<Integer> condition = row -> row >= 0 && row < Board.ROWS;
+
+        for (int column = board.getLastDiscColumn(); column < Board.COLUMNS && condition.test(actualRow); column++) {
             if (board.getSign(actualRow, column) == player) {
-                discsQty++;
-                actualRow--;
+                discsAmount++;
+                if (isRight) actualRow--;
+                else actualRow++;
             } else break;
         }
         actualRow = board.getLastDiscRow();
-        for (int column = board.getLastDiscColumn(); column >= 0 && actualRow < Board.ROWS; column--) {
-            if (board.getSign(actualRow, column) == player)
-                discsQty++;
-            else break;
-            actualRow++;
-        }
-        discsQty--;
-        return discsQty > 3;
-    }
-
-    private boolean isLeftDiagonal(char player) {
-        int actualRow = board.getLastDiscRow();
-        int discsQty = 0;
-        for (int column = board.getLastDiscColumn(); column >= 0 && actualRow >= 0; column--) {
+        for (int column = board.getLastDiscColumn(); column >= 0 && condition.test(actualRow); column--) {
             if (board.getSign(actualRow, column) == player) {
-                discsQty++;
-                actualRow--;
+                discsAmount++;
+                if (isRight) actualRow++;
+                else actualRow--;
             } else break;
         }
-        actualRow = board.getLastDiscRow();
-        for (int column = board.getLastDiscColumn(); column < Board.COLUMNS && actualRow < Board.ROWS; column++) {
-            if (board.getSign(actualRow, column) == player)
-                discsQty++;
-            else break;
-            actualRow++;
-        }
-        discsQty--;
-        return discsQty > 3;
+        discsAmount--;
+        return discsAmount > 3;
     }
 
     public void setCurrentPlayer(char currentPlayer) {

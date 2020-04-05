@@ -114,7 +114,7 @@ public class ConnectFourSpec {
     }
 
     @Test
-    void whenMoreThan3DiscsInDiagonalPlayerShouldWin() throws WrongColumnOrRowException, FullColumnException {
+    void whenMoreThan3DiscsInRightDiagonalPlayerShouldWin() throws WrongColumnOrRowException, FullColumnException {
         connectFour.setCurrentPlayer(ConnectFour.FIRST_PLAYER);
 
         connectFour.dropDisc(0, ConnectFour.FIRST_PLAYER);
@@ -132,5 +132,53 @@ public class ConnectFourSpec {
         connectFour.dropDisc(3, ConnectFour.FIRST_PLAYER);
 
         assertEquals(ConnectFour.FIRST_PLAYER, connectFour.getResult());
+    }
+
+    @Test
+    void whenMoreThan3DiscsInLeftDiagonalPlayerShouldWin() throws WrongColumnOrRowException, FullColumnException {
+        connectFour.setCurrentPlayer(ConnectFour.FIRST_PLAYER);
+
+        connectFour.dropDisc(3, ConnectFour.FIRST_PLAYER);
+
+        connectFour.dropDisc(2, ConnectFour.SECOND_PLAYER);
+        connectFour.dropDisc(2, ConnectFour.FIRST_PLAYER);
+
+        connectFour.dropDisc(1, ConnectFour.SECOND_PLAYER);
+        connectFour.dropDisc(1, ConnectFour.SECOND_PLAYER);
+        connectFour.dropDisc(1, ConnectFour.FIRST_PLAYER);
+
+        connectFour.dropDisc(0, ConnectFour.SECOND_PLAYER);
+        connectFour.dropDisc(0, ConnectFour.SECOND_PLAYER);
+        connectFour.dropDisc(0, ConnectFour.SECOND_PLAYER);
+        connectFour.dropDisc(0, ConnectFour.FIRST_PLAYER);
+
+        assertEquals(ConnectFour.FIRST_PLAYER, connectFour.getResult());
+    }
+
+    @Test
+    void whenDiscsNotInLeftDiagonalPlayerShouldNotWin() throws WrongColumnOrRowException, FullColumnException {
+        connectFour.setCurrentPlayer(ConnectFour.FIRST_PLAYER);
+
+        connectFour.dropDisc(4, ConnectFour.FIRST_PLAYER);
+
+        connectFour.dropDisc(3, ConnectFour.SECOND_PLAYER);
+        connectFour.dropDisc(3, ConnectFour.FIRST_PLAYER);
+
+        connectFour.dropDisc(2, ConnectFour.SECOND_PLAYER);
+        connectFour.dropDisc(2, ConnectFour.SECOND_PLAYER);
+        connectFour.dropDisc(2, ConnectFour.SECOND_PLAYER);
+
+        connectFour.dropDisc(1, ConnectFour.SECOND_PLAYER);
+        connectFour.dropDisc(1, ConnectFour.SECOND_PLAYER);
+        connectFour.dropDisc(1, ConnectFour.SECOND_PLAYER);
+        connectFour.dropDisc(1, ConnectFour.FIRST_PLAYER);
+
+        connectFour.dropDisc(0, ConnectFour.SECOND_PLAYER);
+        connectFour.dropDisc(0, ConnectFour.SECOND_PLAYER);
+        connectFour.dropDisc(0, ConnectFour.SECOND_PLAYER);
+        connectFour.dropDisc(0, ConnectFour.SECOND_PLAYER);
+        connectFour.dropDisc(0, ConnectFour.FIRST_PLAYER);
+
+        assertNotEquals(ConnectFour.FIRST_PLAYER, connectFour.getResult());
     }
 }
