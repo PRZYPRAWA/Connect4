@@ -64,7 +64,7 @@ public class ConnectFour {
     }
 
     public boolean isWin(char player) {
-        return isHorizontal(player) || isVertical(player);
+        return isHorizontal(player) || isVertical(player) || isDiagonal(player);
     }
 
     private boolean isHorizontal(char player) {
@@ -95,6 +95,50 @@ public class ConnectFour {
             else return (discAmount > 3);
         }
         return (discAmount > 3);
+    }
+
+    private boolean isDiagonal(char player) {
+        return isRightDiagonal(player) || isLeftDiagonal(player);
+    }
+
+    private boolean isRightDiagonal(char player) {
+        int actualRow = board.getLastDiscRow();
+        int discsQty = 0;
+        for (int column = board.getLastDiscColumn(); column < Board.COLUMNS && actualRow >= 0; column++) {
+            if (board.getSign(actualRow, column) == player) {
+                discsQty++;
+                actualRow--;
+            } else break;
+        }
+        actualRow = board.getLastDiscRow();
+        for (int column = board.getLastDiscColumn(); column >= 0 && actualRow < Board.ROWS; column--) {
+            if (board.getSign(actualRow, column) == player)
+                discsQty++;
+            else break;
+            actualRow++;
+        }
+        discsQty--;
+        return discsQty > 3;
+    }
+
+    private boolean isLeftDiagonal(char player) {
+        int actualRow = board.getLastDiscRow();
+        int discsQty = 0;
+        for (int column = board.getLastDiscColumn(); column >= 0 && actualRow >= 0; column--) {
+            if (board.getSign(actualRow, column) == player) {
+                discsQty++;
+                actualRow--;
+            } else break;
+        }
+        actualRow = board.getLastDiscRow();
+        for (int column = board.getLastDiscColumn(); column < Board.COLUMNS && actualRow < Board.ROWS; column++) {
+            if (board.getSign(actualRow, column) == player)
+                discsQty++;
+            else break;
+            actualRow++;
+        }
+        discsQty--;
+        return discsQty > 3;
     }
 
     public void setCurrentPlayer(char currentPlayer) {
