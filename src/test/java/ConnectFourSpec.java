@@ -112,4 +112,25 @@ public class ConnectFourSpec {
             connectFour.dropDisc(i, ConnectFour.FIRST_PLAYER);
         assertNotEquals(ConnectFour.FIRST_PLAYER, connectFour.getResult());
     }
+
+    @Test
+    void whenMoreThan3DiscsInDiagonalPlayerShouldWin() throws WrongColumnOrRowException, FullColumnException {
+        connectFour.setCurrentPlayer(ConnectFour.FIRST_PLAYER);
+
+        connectFour.dropDisc(0, ConnectFour.FIRST_PLAYER);
+
+        connectFour.dropDisc(1, ConnectFour.SECOND_PLAYER);
+        connectFour.dropDisc(1, ConnectFour.FIRST_PLAYER);
+
+        connectFour.dropDisc(2, ConnectFour.SECOND_PLAYER);
+        connectFour.dropDisc(2, ConnectFour.SECOND_PLAYER);
+        connectFour.dropDisc(2, ConnectFour.FIRST_PLAYER);
+
+        connectFour.dropDisc(3, ConnectFour.SECOND_PLAYER);
+        connectFour.dropDisc(3, ConnectFour.SECOND_PLAYER);
+        connectFour.dropDisc(3, ConnectFour.SECOND_PLAYER);
+        connectFour.dropDisc(3, ConnectFour.FIRST_PLAYER);
+
+        assertEquals(ConnectFour.FIRST_PLAYER, connectFour.getResult());
+    }
 }
