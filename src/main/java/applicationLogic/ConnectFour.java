@@ -11,7 +11,7 @@ public class ConnectFour {
     private int droppedDiscs = 0;
     private char currentPlayer;
 
-    public final static char FIRST_PLAYER = 'r', SECOND_PLAYER = 'g', EMPTY = 'o', DRAW = 'd';
+    public final static char FIRST_PLAYER = 'r', SECOND_PLAYER = 'g', EMPTY = 32, DRAW = 'd';
 
     //----------------------------------------------------------------------------------------------------------------//
 
@@ -127,5 +127,9 @@ public class ConnectFour {
 
     public void setCurrentPlayer(char currentPlayer) {
         this.currentPlayer = currentPlayer;
+    }
+
+    public Board getBoard() {
+        return board;
     }
 }

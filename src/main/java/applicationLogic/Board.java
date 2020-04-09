@@ -44,4 +44,5 @@ public class Board {
     public int getLastDiscColumn() {
         return lastColumnDropIndex;
     }
+
 }
