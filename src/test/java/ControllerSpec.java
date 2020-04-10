@@ -16,13 +16,10 @@ public class ControllerSpec {
 
     @Test
     void whenTheGameStartsAndPlayerDropsDiscThenAnotherPlayerDrops() {
-        gameController.startGame();
         char firstPlayer = gameController.getCurrentPlayer();
-
         int col = 0;
         gameController.nextTurn(col);
         char secondPlayer = gameController.getCurrentPlayer();
-
         assertNotEquals(firstPlayer, secondPlayer);
     }
 }
