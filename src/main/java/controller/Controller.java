@@ -9,8 +9,6 @@ public class Controller {
     private ConnectFour gameLogic;
     private GameCli gameCli;
 
-    private boolean gameIsFinished = false;
-
     //----------------------------------------------------------------------------------------------------------------//
     public Controller(ConnectFour gameLogic, GameCli gameCli) {
         this.gameLogic = gameLogic;
@@ -20,10 +18,12 @@ public class Controller {
     //----------------------------------------------------------------------------------------------------------------//
     public void startGame() {
         gameCli.printStartedMsg();
-        while (!gameIsFinished) {
-            printBoard();
+        while (true) {
+            gameCli.printActualTurn(gameLogic.getCurrentPlayer());
+            gameCli.printBoard(gameLogic.getBoard());
             nextTurn(gameCli.readColumn());
         }
+
     }
 
     public void nextTurn(int col) {
@@ -36,14 +36,8 @@ public class Controller {
             gameCli.printWrongColumnError();
             return;
         }
-        printBoard();
         checkGameStatus();
         gameLogic.changePlayer();
-    }
-
-    private void printBoard() {
-        gameCli.printActualTurn(gameLogic.getCurrentPlayer());
-        gameCli.printBoard(gameLogic.getBoard());
     }
 
     private void checkGameStatus() {
@@ -51,16 +45,19 @@ public class Controller {
         if (result != ConnectFour.EMPTY) {
             if (result == ConnectFour.DRAW)
                 gameCli.printDrawMsg();
-            else gameCli.printWinnerMsg(result);
-            restartGame(gameCli.readRestartGame());
+            else {
+                gameCli.printWinnerMsg(result);
+                gameCli.printBoard(gameLogic.getBoard());
+            }
+            finishOrRestartGame(gameCli.readRestartGame());
         }
     }
 
-    private void restartGame(boolean value) {
-        if (value) {
+    private void finishOrRestartGame(boolean restart) {
+        if (restart) {
             gameLogic.restartGame();
             gameCli.printStartedMsg();
-        }
+        } else System.exit(0);
 
     }
 

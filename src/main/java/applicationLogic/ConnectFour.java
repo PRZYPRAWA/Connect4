@@ -11,7 +11,7 @@ public class ConnectFour {
     private int droppedDiscs;
     private char currentPlayer;
 
-    public final static char FIRST_PLAYER = 'r', SECOND_PLAYER = 'g', EMPTY = 32, DRAW = 'd';
+    public final static char FIRST_PLAYER = 'X', SECOND_PLAYER = 'Q', EMPTY = 'o', DRAW = 'd';
 
     //----------------------------------------------------------------------------------------------------------------//
 
@@ -30,7 +30,6 @@ public class ConnectFour {
         Random r = new Random();
         currentPlayer = r.nextBoolean() ? FIRST_PLAYER : SECOND_PLAYER;
     }
-
 
     public int getDroppedDiscsQty() {
         return droppedDiscs;
