@@ -21,8 +21,8 @@ Open it by console with command:
 java -jar Connect4.jar
 ```
 
-- Windows 
-You need bash (for example git_bash to open it correctly). If you dont have that one, you can open Connect4_noncolor.jar in cmd, but your game will be without colors
+- Windows <br/>
+You need `bash` (for example `git bash` to open it correctly). If you dont have that one, you can open `Connect4_noncolor.jar` in `cmd`, but your game will be without colors
 ---
 ## 📫 Contact
 <a href="https://github.com/Ukasz09" target="_blank"><img src="https://avatars0.githubusercontent.com/u/44710226?s=460&v=4" width="100px;"></a>
