@@ -5,6 +5,9 @@
 - :white_check_mark: TDD <br/>
 - :white_check_mark: MVC <br/>
 
+## Rules
+https://en.wikipedia.org/wiki/Connect_Four
+
 ## Screenshots 
 ![win](https://raw.githubusercontent.com/Ukasz09/Connect4/master/readme_images/full.png)
 ![full column](https://raw.githubusercontent.com/Ukasz09/Connect4/master/readme_images/wrong.png)
