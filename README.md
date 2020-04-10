@@ -1,14 +1,13 @@
-# :red_circle::black_circle: Connect4 Game [![License](https://img.shields.io/badge/licence-MIT-blue)](https://choosealicense.com/licenses/mit/) [![Contributions welcome](https://img.shields.io/badge/contributions-welcome-orange.svg)]
+# :red_circle::black_circle: Connect4 Game [![License](https://img.shields.io/badge/licence-MIT-blue)](https://choosealicense.com/licenses/mit/) [![Contributions welcome](https://img.shields.io/badge/contributions-welcome-orange.svg)](https://github.com/Ukasz09/Connect4)
 
 <br/>
-- Pair programming <br/>
-- TDD <br/>
-- MVC <br/>
+- :white_check_mark: Pair programming <br/>
+- :white_check_mark: TDD <br/>
+- :white_check_mark: MVC <br/>
 
 ## Screenshots 
-
-![alt text](https://raw.githubusercontent.com/Ukasz09/PrinterSimulator/master/readme_images/1.png)
-![alt text](https://raw.githubusercontent.com/Ukasz09/PrinterSimulator/master/readme_images/2.png)
+![alt text](https://raw.githubusercontent.com/Ukasz09/Connect4/master/readme_images/1.png)
+![alt text](https://raw.githubusercontent.com/Ukasz09/Connect4/master/readme_images/2.png)
 
 ## How to use it
 Open it by console with command:
