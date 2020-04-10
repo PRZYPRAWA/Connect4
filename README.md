@@ -6,9 +6,9 @@
 - :white_check_mark: MVC <br/>
 
 ## Screenshots 
-![win](https://raw.githubusercontent.com/Ukasz09/Connect4/master/readme_images/1.png)
-![full column](https://raw.githubusercontent.com/Ukasz09/Connect4/master/readme_images/2.png)
-![wrong column](https://raw.githubusercontent.com/Ukasz09/Connect4/master/readme_images/3.png)
+![win](https://raw.githubusercontent.com/Ukasz09/Connect4/master/readme_images/full.png)
+![full column](https://raw.githubusercontent.com/Ukasz09/Connect4/master/readme_images/wrong.png)
+![wrong column](https://raw.githubusercontent.com/Ukasz09/Connect4/master/readme_images/win.png)
 
 ## How to use it
 Open it by console with command:
