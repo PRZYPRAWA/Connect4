@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 
 public class ConnectFour {
     private Board board;
-    private int droppedDiscs = 0;
+    private int droppedDiscs;
     private char currentPlayer;
 
     public final static char FIRST_PLAYER = 'r', SECOND_PLAYER = 'g', EMPTY = 32, DRAW = 'd';
@@ -16,10 +16,21 @@ public class ConnectFour {
     //----------------------------------------------------------------------------------------------------------------//
 
     public ConnectFour() {
-        this.board = new Board();
+        restartGame();
     }
 
     //----------------------------------------------------------------------------------------------------------------//
+    public void restartGame() {
+        board = new Board();
+        droppedDiscs = 0;
+        startGame();
+    }
+
+    private void startGame() {
+        Random r = new Random();
+        currentPlayer = r.nextBoolean() ? FIRST_PLAYER : SECOND_PLAYER;
+    }
+
 
     public int getDroppedDiscsQty() {
         return droppedDiscs;
@@ -37,11 +48,6 @@ public class ConnectFour {
 
     public int getDiscsInColumnQty(int col) {
         return board.getDiscsInColumnQty(col);
-    }
-
-    public void startGame() {
-        Random r = new Random();
-        currentPlayer = r.nextBoolean() ? FIRST_PLAYER : SECOND_PLAYER;
     }
 
     public char getCurrentPlayer() {

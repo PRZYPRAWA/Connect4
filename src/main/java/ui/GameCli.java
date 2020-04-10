@@ -2,9 +2,6 @@ package ui;
 
 import applicationLogic.Board;
 
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Scanner;
 
@@ -13,30 +10,27 @@ public class GameCli {
     private static final String BOARD_FOOTER = getBoardFooter();
     public static final String COLUMN_IS_FULL_MSG = "COLUMN IS FULL", WRONG_COLUMN_MSG = "WRONG COLUMN";
 
-
     private PrintStream consoleOut = System.out;
     private Scanner consoleIn = new Scanner(System.in);
-
-    private char lastPressedSign = '\0';
 
     //----------------------------------------------------------------------------------------------------------------//
     private static String getBoardFooter() {
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < supportLength(); i++)
+        for (int i = 0; i < boardLength(); i++)
             builder.append(BOARD_MIDDLE_FRAME);
         return builder.toString();
     }
 
-    private static int supportLength() {
+    private static int boardLength() {
         return ((COLUMN_DELIMITER + BOARD_MIDDLE_FRAME).length() * 2 + COLUMN_DELIMITER.length() * (Board.COLUMNS + 1) + Board.COLUMNS);
     }
 
     public void printFullColumnError() {
-        //todo:
+        printlnCentered(COLUMN_IS_FULL_MSG);
     }
 
     public void printWrongColumnError() {
-        consoleOut.println(WRONG_COLUMN_MSG);
+        printlnCentered(WRONG_COLUMN_MSG);
     }
 
     public void printBoard(Board board) {
@@ -57,12 +51,10 @@ public class GameCli {
     }
 
     private void printColumnIndexes() {
-        for (int i = 0; i < (COLUMN_DELIMITER + BOARD_MIDDLE_FRAME).length(); i++)
-            consoleOut.print(" ");
-        for (int col = 0; col < Board.COLUMNS; col++) {
-            consoleOut.print(COLUMN_DELIMITER);
-            consoleOut.print(col);
-        }
+        consoleOut.print(COLUMN_DELIMITER + BOARD_MIDDLE_FRAME);
+        for (int col = 0; col < Board.COLUMNS; col++)
+            consoleOut.print(COLUMN_DELIMITER + col);
+        consoleOut.print(COLUMN_DELIMITER + BOARD_MIDDLE_FRAME);
     }
 
     public int readColumn() {
@@ -71,11 +63,61 @@ public class GameCli {
             String input = consoleIn.nextLine();
             consoleOut.println();
             try {
-                int column = Integer.parseInt(input);
-                return column;
+                return Integer.parseInt(input);
             } catch (NumberFormatException e) {
                 printWrongColumnError();
             }
         }
+    }
+
+    public boolean readRestartGame() {
+        while (true) {
+            printlnCentered("Do you want to play once again? (y/n): ");
+            String input = consoleIn.nextLine();
+            consoleOut.println();
+            if (input.toLowerCase().strip().equals("y"))
+                return true;
+            if (input.toLowerCase().strip().equals("n"))
+                return false;
+            printlnCentered("Incorrect decision! Give 'y' or 'n'");
+        }
+    }
+
+    public void printActualTurn(char actualPlayerSign) {
+        consoleOut.println(getBoardFooter());
+        printlnCentered("Player turn: " + actualPlayerSign);
+        consoleOut.println(getBoardFooter());
+        consoleOut.println();
+    }
+
+    public void printDrawMsg() {
+        printlnCentered("Unlucky. It's a draw");
+    }
+
+    public void printWinnerMsg(char winner) {
+        printlnCentered("Congratulations. Winner is player: " + winner);
+    }
+
+    public void printStartedMsg() {
+        consoleOut.println(getBoardFooter());
+        printlnCentered("Connect4 Game");
+        consoleOut.println(getBoardFooter());
+        printlnCentered("Board is reset and ready for game!");
+        consoleOut.println(getBoardFooter());
+        consoleOut.println();
+    }
+
+    private void printlnCentered(String text) {
+        setCaretToCenter(text.length());
+        consoleOut.println(text);
+    }
+
+    private void setCaretToCenter(int textLength) {
+        int boardLength = boardLength();
+        int emptySpaces = 0;
+        if (textLength < boardLength)
+            emptySpaces = (boardLength - textLength) / 2;
+        for (int i = 0; i < emptySpaces; i++)
+            consoleOut.print(" ");
     }
 }
