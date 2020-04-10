@@ -24,4 +24,4 @@ java -jar Connect4.jar
 <a href="https://github.com/Ukasz09" target="_blank"><img src="https://avatars0.githubusercontent.com/u/44710226?s=460&v=4" width="100px;"></a>
 <a href="https://github.com/PRZYPRAWA" target="_blank"><img src="https://avatars3.githubusercontent.com/u/30748558?s=460&v=4" width="100px;"></a>
 <br/>
-Feel free to contact with us 😎
+Feel free to contact us 😎
