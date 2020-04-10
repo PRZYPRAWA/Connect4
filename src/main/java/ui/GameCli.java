@@ -90,9 +90,9 @@ public class GameCli {
             printCentered("Do you want to play once again? (y/n): ", INPUT_COLOR);
             String input = consoleIn.nextLine();
             consoleOut.println();
-            if (input.toLowerCase().strip().equals("y"))
+            if (input.toLowerCase().equals("y"))
                 return true;
-            if (input.toLowerCase().strip().equals("n"))
+            if (input.toLowerCase().equals("n"))
                 return false;
             printlnCentered("Incorrect decision! Give 'y' or 'n'", RED_BOLD);
         }
