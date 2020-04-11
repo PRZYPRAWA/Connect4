@@ -1,0 +1,1 @@
+ansicon java -jar Connect4.jar
