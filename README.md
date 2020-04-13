@@ -21,8 +21,16 @@ Open it by console with command:
 java -jar Connect4.jar
 ```
 
-- Windows <br/>
-You need `bash` (for example `git bash` to open it correctly). If you dont have that one, you can open `Connect4_noncolor.jar` in `cmd`, but your game will be without colors
+- Windows <br/><br/>
+Windows CMD not support ansi colors in console, so to run game properly, you need to do steps from a) OR b): <br/><br/>
+  a) Open it using bash (e.g. `Git Bash`) similarly as in Linux <br/>
+  b) Open it using `CMD`: <br/>
+  	 - download directory `CMD_EXE`
+  	 - inside this directory you can find two directories (`x64` and `x86`). Open one of them, in accordance with your system version
+  	 - run `RunGame.bat` script 
+
+If you don't see directories x64 or x86 inside CMD_EXE after downloading it or you have some other problems, try to disable `Windows Defender`, download folder again and repeat steps from a) OR b)
+
 ---
 ## 📫 Contact
 <a href="https://github.com/Ukasz09" target="_blank"><img src="https://avatars0.githubusercontent.com/u/44710226?s=460&v=4" width="100px;"></a>
