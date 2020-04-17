@@ -153,4 +153,13 @@ public class GameCli {
         for (int i = 0; i < emptySpaces; i++)
             consoleOut.print(" ");
     }
+
+    public void serverError(String errMessage) {
+        printCentered("Server internal error: " + errMessage, RED_BOLD);
+    }
+
+    public void waitForAnyInput() {
+        consoleOut.println("Press any button to continue ...");
+        consoleIn.nextLine();
+    }
 }
