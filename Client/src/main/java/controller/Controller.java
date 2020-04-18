@@ -9,42 +9,14 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class Controller {
     public final static char FIRST_PLAYER_SIGN = 'X', SECOND_PLAYER_SIGN = 'Q', DRAW_SIGN = 'd'; //EMPTY = 'o',
 
-    private static final String SERVER_URI = "tcp://broker.mqttdashboard.com:1883";
-    private static final int QoS = 1;
-
-    private static final String GAME_CONFIG_TOPIC = "connect4/configuration";
-    private static final String FIELD_CHOOSE_TOPIC = "connect4/board/field/choose";
-
-    //client subscribes
-    private static final String SERVER_ERROR_TOPIC = "connect4/error";
-    private static final String GAME_EXCEPTION_TOPIC = "connect4/exception";
-    private static final String GAME_RESULTS_TOPIC = "connect4/result";
-    private static final String GAME_OTHERS_TOPIC = "connect4/others";
-    private static final String FIELD_REQUEST_TOPIC = "connect4/board/field/request";
-    private static final String BOARD_LOOK_TOPIC = "connect4/board/look";
-    private static final String PLAYER_SIGN_TOPIC = "connect4/playerSign";
-
-
-    private static final String MSG_DELIMITER = ":";
-
-    private static final String WRONG_COLUMN = "WRONG_COLUMN";
-    private static final String FULL_COLUMN = "FULL_COLUMN";
-    private static final String RESTART_REQUEST = "RESTART_REQUEST";
-    //    private static final String FIELD_REQUEST = "FIELD_REQUEST";
-    private static final String DRAW = "DRAW";
-    private static final String WINNER = "WINNER";
-    private static final String START_GAME = "START_GAME";
-    private static final String CLIENT_CONNECTED = "CLIENT_CONNECTED";
-
     private GameCli gameCli;
     private MqttClient broker;
-    private char playerSign = '\0';
-    private int boardColumnsQty = 0;
-    private int boardRowsQty = 0;
+    private MqttProperty property;
 
     //----------------------------------------------------------------------------------------------------------------//
     public Controller(GameCli gameCli) {
         this.gameCli = gameCli;
+        this.property = new MqttProperty();
     }
 
     //----------------------------------------------------------------------------------------------------------------//
@@ -57,41 +29,84 @@ public class Controller {
 
         @Override
         public void messageArrived(String topic, MqttMessage message) {
-            if (topic.equals(GAME_EXCEPTION_TOPIC)) {
-                if (message.toString().equals(WRONG_COLUMN))
-                    gameCli.printWrongColumnError(boardColumnsQty);
-                else if (message.toString().equals(FULL_COLUMN))
-                    gameCli.printFullColumnError(boardColumnsQty);
-                else
-                    System.out.println("INNY EXCEPTION: " + message.toString());
-            } else if (topic.equals(GAME_RESULTS_TOPIC)) {
-                if (message.toString().equals(DRAW))
-                    gameCli.printDrawMsg(boardColumnsQty);
-                else if (message.toString().contains(WINNER)) {
-                    String[] decoded = message.toString().split(MSG_DELIMITER);
-                    gameCli.printWinnerMsg(decoded[1].charAt(0), boardColumnsQty);
-                } else System.out.println("INNY RESULT: " + message.toString());
-            } else if (topic.equals(FIELD_REQUEST_TOPIC))
-                readFieldChoose();
-            else if (topic.equals(BOARD_LOOK_TOPIC)) {
+            String textMessage = message.toString();
+            if (textMessage.equals(MqttProperty.BOARD_LOOK_TOPIC)) {
                 char[][] board = decodeBoardLookMsg(message.toString());
-                boardColumnsQty = board[0].length;
-                boardRowsQty = board.length;
+                gameCli.setBoardColumnsQty(board[0].length);
                 gameCli.printBoard(board);
-            } else if (topic.equals(PLAYER_SIGN_TOPIC)) {
-                playerSign = message.toString().charAt(0);
-                gameCli.printStartedMsg(boardColumnsQty); //todo: tutaj napis nie wysrodkuje bo bedzie 0
-            } else if (topic.equals(GAME_OTHERS_TOPIC)) {
-                if (message.toString().equals(RESTART_REQUEST)) {
-                    readRestartInput();
-                } else if (message.toString().equals(START_GAME))
-                    gameCli.printStartedMsg(boardColumnsQty);
-                else System.out.println("INNY: " + message.toString());
-            }
-
-            System.out.println(topic + ": " + message.toString());
+            } else if (textMessage.equals(property.getFieldTopic()))
+                fieldTopicMsg(textMessage);
+            else if (textMessage.equals(MqttProperty.RESULTS_TOPIC))
+                resultTopicMsg(textMessage);
+            else if (textMessage.equals(property.getPreparationTopic()))
+                preparationTopicMsg(textMessage);
         }
 
+        private char[][] decodeBoardLookMsg(String msg) {
+            String[] decoded = msg.split(MqttProperty.DELIMITER);
+            int rows = getNumberFromMsg(decoded[0]);
+            int columns = getNumberFromMsg(decoded[1]);
+            char[][] board = new char[rows][columns];
+
+            for (int row = 0; row < rows; row++)
+                for (int col = 0; col < columns; col++)
+                    board[row][col] = decoded[columns * row + col + 2].charAt(0);
+            return board;
+        }
+
+        private int getNumberFromMsg(String number) {
+            int result = 0;
+            try {
+                result = Integer.parseInt(number);
+            } catch (NumberFormatException e) {
+                criticalErrorAction("Cant read board look from server " + e.getMessage());
+            }
+            return result;
+        }
+
+        private void resultTopicMsg(String message) {
+            switch (message) {
+                case MqttProperty.DRAW_MSG:
+                    gameCli.printDrawMsg();
+                    break;
+                case MqttProperty.WINNER_MSG: {
+                    String[] decoded = message.split(MqttProperty.DELIMITER);
+                    gameCli.printWinnerMsg(decoded[1].charAt(0));
+                }
+                break;
+            }
+        }
+
+        private void fieldTopicMsg(String message) {
+            switch (message) {
+                case MqttProperty.FIELD_REQUEST_MSG:
+                    fieldChooseInput();
+                    break;
+                case MqttProperty.WRONG_COLUMN_MSG:
+                    gameCli.printWrongColumnError();
+                    break;
+                case MqttProperty.FULL_COLUMN_MSG:
+                    gameCli.printFullColumnError();
+                    break;
+            }
+        }
+
+
+        private void preparationTopicMsg(String message) {
+            switch (message) {
+                case MqttProperty.GIVEN_SIGN_MSG: {
+                    property.setPlayerSign(message.charAt(0));
+                    gameCli.printStartedMsg();
+                }
+                break;
+                case MqttProperty.START_GAME:
+                    gameCli.printStartedMsg();
+                    break;
+                case MqttProperty.RESTART_REQUEST_MSG:
+                    restartInput();
+                    break;
+            }
+        }
 
         @Override
         public void deliveryComplete(IMqttDeliveryToken token) {
@@ -100,91 +115,68 @@ public class Controller {
         }
     }
 
-
     //----------------------------------------------------------------------------------------------------------------//
     private void connectToMqtt() {
         try {
-            broker = new MqttClient(SERVER_URI, MqttClient.generateClientId(), new MemoryPersistence());
+            broker = new MqttClient(MqttProperty.SERVER_URI, MqttClient.generateClientId(), new MemoryPersistence());
             broker.setCallback(new MqttCallbackHandler());
             broker.connect();
             subscribeTopics();
         } catch (MqttException e) {
-            gameCli.serverError("Can't connect with MQTT protocol: " + e.getMessage());
-            gameCli.waitForAnyInput();
-            System.exit(1);
+            criticalErrorAction("Can't connect with MQTT protocol: " + e.getMessage());
         }
     }
 
-    //todo: dodac rozlaczenie
-    private void disconnect() {
-        try {
-            broker.disconnect();
-        } catch (MqttException e) {
-            gameCli.serverError("Can't disconnect with MQTT protocol: " + e.getMessage());
-        }
+    private void criticalErrorAction(String message) {
+        gameCli.connectionError(message);
+        gameCli.waitForAnyInput();
+        System.exit(1);
     }
 
     private void subscribeTopics() {
         try {
-            broker.subscribe(SERVER_ERROR_TOPIC, QoS);
-            broker.subscribe(GAME_EXCEPTION_TOPIC, QoS);
-            broker.subscribe(GAME_RESULTS_TOPIC, QoS);
-            broker.subscribe(GAME_OTHERS_TOPIC, QoS);
-            broker.subscribe(GAME_EXCEPTION_TOPIC, QoS);
-            broker.subscribe(GAME_RESULTS_TOPIC, QoS);
-            broker.subscribe(FIELD_REQUEST_TOPIC);
-            broker.subscribe(BOARD_LOOK_TOPIC);
-            broker.subscribe(PLAYER_SIGN_TOPIC);
+            broker.subscribe(MqttProperty.RESULTS_TOPIC);
+            broker.subscribe(MqttProperty.BOARD_LOOK_TOPIC);
+            broker.subscribe(property.getPreparationTopic());
         } catch (MqttException e) {
-            gameCli.serverError("Error while subscribing message via MQTT protocol: " + e.getMessage());
-            gameCli.waitForAnyInput();
-            System.exit(1);
+            criticalErrorAction("Error while subscribing message via MQTT protocol: " + e.getMessage());
         }
     }
 
     private void publish(String topic, String message) {
         try {
-            broker.publish(topic, message.getBytes(UTF_8), QoS, false);
+            broker.publish(topic, message.getBytes(UTF_8), MqttProperty.QoS, false);
         } catch (MqttException e) {
-            gameCli.serverError("Error while publishing message via MQTT protocol: " + e.getMessage());
-            gameCli.waitForAnyInput();
-            System.exit(1);
+            criticalErrorAction("Error while publishing message via MQTT protocol: " + e.getMessage());
         }
     }
 
     public void startGame() {
         connectToMqtt();
-        publish(GAME_CONFIG_TOPIC, CLIENT_CONNECTED);
+        publish(property.getPreparationTopic(), MqttProperty.CLIENT_CONNECTED_MSG);
     }
 
-    private void readRestartInput() {
-        boolean restart = gameCli.readRestartGame(boardColumnsQty);
-        publish(GAME_CONFIG_TOPIC, RESTART_REQUEST + MSG_DELIMITER + restart);
-        if (!restart)
+    private void restartInput() {
+        boolean restart = gameCli.restartGameInput();
+        publish(property.getPreparationTopic(), MqttProperty.RESTART_REPLY_MSG + MqttProperty.DELIMITER + restart);
+        if (!restart) {
+//            disconnect(); //todo: daje wyjątek (?)
             System.exit(0);
-    }
-
-    private void readFieldChoose() {
-        gameCli.printActualTurn(playerSign, boardColumnsQty);
-        int column = gameCli.readColumn();
-        publish(FIELD_CHOOSE_TOPIC, Integer.toString(column));
-    }
-
-    private char[][] decodeBoardLookMsg(String msg) {
-        String[] decoded = msg.split(MSG_DELIMITER);
-        int rows = 0, columns = 0;
-        try {
-            rows = Integer.parseInt(decoded[0]);
-            columns = Integer.parseInt(decoded[1]);
-        } catch (NumberFormatException e) {
-            gameCli.serverError("Error while publishing message via MQTT protocol: " + e.getMessage());
-            gameCli.waitForAnyInput();
-            System.exit(1);
         }
-        char[][] board = new char[rows][columns];
-        for (int row = 0; row < rows; row++)
-            for (int col = 0; col < columns; col++)
-                board[row][col] = decoded[columns * row + col + 2].charAt(0);
-        return board;
     }
+
+    private void disconnect() {
+        try {
+            broker.disconnect();
+        } catch (MqttException e) {
+            gameCli.connectionError("Can't disconnect with MQTT protocol: " + e.getMessage());
+        }
+    }
+
+    private void fieldChooseInput() {
+        gameCli.printActualTurn(property.getPlayerSign());
+        publish(property.getFieldTopic(), Integer.toString(gameCli.readColumn()));
+    }
+
+
 }

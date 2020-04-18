@@ -17,25 +17,30 @@ public class GameCli {
 
     private PrintStream consoleOut = System.out;
     private Scanner consoleIn = new Scanner(System.in);
+    private int columnsQty = 0;
 
     //----------------------------------------------------------------------------------------------------------------//
-    private static String getBoardFooter(int columnsQty) {
+    public void setBoardColumnsQty(int boardColumnsQty) {
+        this.columnsQty = boardColumnsQty;
+    }
+
+    private String getBoardFooter() {
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < boardLength(columnsQty); i++)
+        for (int i = 0; i < boardLength(); i++)
             builder.append(BOARD_MIDDLE_FRAME);
         return builder.toString();
     }
 
-    private static int boardLength(int columnsQty) {
+    private int boardLength() {
         return ((COLUMN_DELIMITER + BOARD_MIDDLE_FRAME).length() * 2 + COLUMN_DELIMITER.length() * (columnsQty + 1) + columnsQty);
     }
 
-    public void printFullColumnError(int columnsQty) {
-        printlnCentered(COLUMN_IS_FULL_MSG, RED_BOLD, columnsQty);
+    public void printFullColumnError() {
+        printlnCentered(COLUMN_IS_FULL_MSG, RED_BOLD);
     }
 
-    public void printWrongColumnError(int columnsQty) {
-        printlnCentered(WRONG_COLUMN_MSG, RED_BOLD, columnsQty);
+    public void printWrongColumnError() {
+        printlnCentered(WRONG_COLUMN_MSG, RED_BOLD);
     }
 
 
@@ -48,7 +53,7 @@ public class GameCli {
             }
             consoleOut.println(COLUMN_DELIMITER + BOARD_COLOR + BOARD_MIDDLE_FRAME + COLUMN_DELIMITER + RESET);
         }
-        printBoardFooter(board[0].length);
+        printBoardFooter();
     }
 
 
@@ -60,14 +65,14 @@ public class GameCli {
         else consoleOut.print(" ");
     }
 
-    private void printBoardFooter(int columnsQty) {
-        String boardFooter = getBoardFooter(columnsQty);
+    private void printBoardFooter() {
+        String boardFooter = getBoardFooter();
         consoleOut.println(BOARD_COLOR + boardFooter + RESET);
-        printColumnIndexes(columnsQty);
+        printColumnIndexes();
         consoleOut.println(BOARD_COLOR + boardFooter + RESET);
     }
 
-    private void printColumnIndexes(int columnsQty) {
+    private void printColumnIndexes() {
         consoleOut.print(BOARD_COLOR + COLUMN_DELIMITER + BOARD_MIDDLE_FRAME + RESET);
         for (int col = 0; col < columnsQty; col++)
             consoleOut.print(COLUMN_DELIMITER + INPUT_COLOR + col + RESET);
@@ -86,68 +91,68 @@ public class GameCli {
         }
     }
 
-    public boolean readRestartGame(int columnsQty) {
+    public boolean restartGameInput() {
         while (true) {
-            printCentered("Do you want to play once again? (y/n): ", INPUT_COLOR, columnsQty);
+            printCentered("Do you want to play once again? (y/n): ", INPUT_COLOR);
             String input = consoleIn.nextLine();
             consoleOut.println();
             if (input.toLowerCase().equals("y"))
                 return true;
             if (input.toLowerCase().equals("n"))
                 return false;
-            printlnCentered("Incorrect decision! Give 'y' or 'n'", RED_BOLD, columnsQty);
+            printlnCentered("Incorrect decision! Give 'y' or 'n'", RED_BOLD);
         }
     }
 
-    public void printActualTurn(char actualPlayerSign, int columnQty) {
-        consoleOut.println(BLUE + getBoardFooter(columnQty) + RESET);
-        printCentered("Player turn: ", WHITE, columnQty);
+    public void printActualTurn(char actualPlayerSign) {
+        consoleOut.println(BLUE + getBoardFooter() + RESET);
+        printCentered("Player turn: ", WHITE);
         printBoardSign(actualPlayerSign);
         consoleOut.println();
-        consoleOut.println(BLUE + getBoardFooter(columnQty) + RESET);
+        consoleOut.println(BLUE + getBoardFooter() + RESET);
         consoleOut.println();
     }
 
-    public void printDrawMsg(int columnsQty) {
-        printlnCentered("Unlucky. It's a draw", YELLOW_BOLD, columnsQty);
+    public void printDrawMsg() {
+        printlnCentered("Unlucky. It's a draw", YELLOW_BOLD);
     }
 
-    public void printWinnerMsg(char winner, int columnsQty) {
+    public void printWinnerMsg(char winner) {
         consoleOut.println();
-        printCentered("Congratulations. Winner is player: ", GREEN_BOLD, columnsQty);
+        printCentered("Congratulations. Winner is player: ", GREEN_BOLD);
         printBoardSign(winner);
-        consoleOut.println("\n" + getBoardFooter(columnsQty));
+        consoleOut.println("\n" + getBoardFooter());
     }
 
-    public void printStartedMsg(int columnQty) {
-        consoleOut.println(GREEN_BOLD + getBoardFooter(columnQty) + RESET);
-        printlnCentered("Connect4 Game", WHITE_BOLD, columnQty);
-        consoleOut.println(GREEN_BOLD + getBoardFooter(columnQty) + RESET);
-        printlnCentered("Board is reset and ready for game!", WHITE, columnQty);
-        consoleOut.println(GREEN_BOLD + getBoardFooter(columnQty) + RESET);
+    public void printStartedMsg() {
+        consoleOut.println(GREEN_BOLD + getBoardFooter() + RESET);
+        printlnCentered("Connect4 Game", WHITE_BOLD);
+        consoleOut.println(GREEN_BOLD + getBoardFooter() + RESET);
+        printlnCentered("Board is reset and ready for game!", WHITE);
+        consoleOut.println(GREEN_BOLD + getBoardFooter() + RESET);
         consoleOut.println();
     }
 
-    private void printCentered(String text, String textColor, int columnsQty) {
-        printCentered(text, textColor, "", columnsQty);
+    private void printCentered(String text, String textColor) {
+        printCentered(text, textColor, "");
     }
 
-    private void printCentered(String text, String textColor, String backgroundColor, int columnsQty) {
-        setCaretToCenter(text.length(), columnsQty);
+    private void printCentered(String text, String textColor, String backgroundColor) {
+        setCaretToCenter(text.length());
         consoleOut.print(textColor + backgroundColor + text + RESET);
     }
 
-    private void printlnCentered(String text, String textColor, int columnsQty) {
-        printlnCentered(text, textColor, "", columnsQty);
+    private void printlnCentered(String text, String textColor) {
+        printlnCentered(text, textColor, "");
     }
 
-    private void printlnCentered(String text, String textColor, String backgroundColor, int columnsQty) {
-        setCaretToCenter(text.length(), columnsQty);
+    private void printlnCentered(String text, String textColor, String backgroundColor) {
+        setCaretToCenter(text.length());
         consoleOut.println(textColor + backgroundColor + text + RESET);
     }
 
-    private void setCaretToCenter(int textLength, int columnsQty) {
-        int boardLength = boardLength(columnsQty);
+    private void setCaretToCenter(int textLength) {
+        int boardLength = boardLength();
         int emptySpaces = 0;
         if (textLength < boardLength)
             emptySpaces = (boardLength - textLength) / 2;
@@ -155,7 +160,7 @@ public class GameCli {
             consoleOut.print(" ");
     }
 
-    public void serverError(String errMessage) {
+    public void connectionError(String errMessage) {
         consoleOut.print(RED_BOLD + "Server internal error: " + errMessage + RESET);
     }
 
