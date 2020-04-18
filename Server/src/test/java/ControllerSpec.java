@@ -2,7 +2,6 @@ import applicationLogic.ConnectFour;
 import controller.Controller;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ui.GameCli;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -11,7 +10,7 @@ public class ControllerSpec {
 
     @BeforeEach
     void initialize() {
-        gameController = new Controller(new ConnectFour(), new GameCli());
+        gameController = new Controller(new ConnectFour());
     }
 
     @Test
