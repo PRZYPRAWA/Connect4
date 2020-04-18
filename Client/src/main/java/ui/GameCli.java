@@ -161,6 +161,6 @@ public class GameCli {
 
     public void waitForAnyInput() {
         consoleOut.println("Press any button to continue ...");
-        consoleIn.nextLine();
+       consoleIn.nextLine();
     }
 }
