@@ -9,13 +9,12 @@ public class Board {
     private int lastColumnDropIndex = -1;
 
     //----------------------------------------------------------------------------------------------------------------//
-
     public Board() {
         board = new char[ROWS][COLUMNS];
         for (int i = 0; i < ROWS; i++) Arrays.fill(board[i], ConnectFour.EMPTY);
     }
 
-
+    //----------------------------------------------------------------------------------------------------------------//
     public int getDiscsInColumnQty(int col) {
         int discsQty = 0;
         for (int i = 0; i < ROWS; i++)

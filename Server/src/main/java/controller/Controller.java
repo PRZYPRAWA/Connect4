@@ -7,43 +7,18 @@ import applicationLogic.exceptions.WrongColumnOrRowException;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+//todo: fix tests
 public class Controller {
-    private static final int QoS = 1;
-    private static final String SERVER_URI = "tcp://broker.mqttdashboard.com:1883";
-    private static final String SERVER_ERROR_TOPIC = "connect4/error";
-    private static final String GAME_EXCEPTION_TOPIC = "connect4/exception";
-    private static final String GAME_RESULTS_TOPIC = "connect4/result";
-    private static final String GAME_OTHERS_TOPIC = "connect4/others";
-
-    private static final String FIELD_REQUEST_TOPIC = "connect4/board/field/request";
-    private static final String BOARD_LOOK_TOPIC = "connect4/board/look";
-    private static final String PLAYER_SIGN_TOPIC = "connect4/playerSign";
-
-    //server subcription
-    private static final String FIELD_CHOOSE_TOPIC = "connect4/board/field/choose";
-    private static final String GAME_CONFIG_TOPIC = "connect4/configuration";
-
-    private static final String MSG_DELIMITER = ":";
-
-    private static final String WRONG_COLUMN = "WRONG_COLUMN";
-    private static final String FULL_COLUMN = "FULL_COLUMN";
-    private static final String RESTART_GAME_REQUEST = "RESTART_REQUEST";
-    private static final String DRAW = "DRAW";
-    private static final String WINNER = "WINNER";
-    private static final String START_GAME = "START_GAME";
-    private static final String FIELD_REQUEST = "FIELD_REQUEST";
-    private static final String CLIENT_CONNECTED = "CLIENT_CONNECTED";
-
-
     private ConnectFour gameLogic;
     private IMqttClient broker;
+    private MqttCallbackHandler callbackHandler;
+
     private List<Character> availablePlayerSigns;
+    private Map<Character, String> signWitClientID;
 
     //----------------------------------------------------------------------------------------------------------------//
     private class MqttCallbackHandler implements MqttCallback {
@@ -55,31 +30,84 @@ public class Controller {
 
         @Override
         public void messageArrived(String topic, MqttMessage message) {
-            if (topic.equals(FIELD_CHOOSE_TOPIC)) {
-                try {
-                    int column = Integer.parseInt(message.toString());
-                    nextTurn(column);
-                } catch (NumberFormatException e) {
-                    publish(GAME_EXCEPTION_TOPIC, WRONG_COLUMN);
-                    publish(BOARD_LOOK_TOPIC, getBoardLookMsg());
-                    publish(FIELD_REQUEST_TOPIC, FIELD_REQUEST);
-                }
-            } else if (topic.equals(GAME_CONFIG_TOPIC)) {
-                if (message.toString().contains(RESTART_GAME_REQUEST)) {
-                    String[] decoded = message.toString().split(MSG_DELIMITER);
-                    boolean restart = Boolean.parseBoolean(decoded[1]);
-                    finishOrRestartGame(restart);
-                    publish(BOARD_LOOK_TOPIC, getBoardLookMsg());
-                    publish(FIELD_REQUEST_TOPIC, FIELD_REQUEST);
-                } else if (message.toString().equals(CLIENT_CONNECTED)) {
-                    publish(PLAYER_SIGN_TOPIC, Character.toString(getRandomAvailableSign())); //todo: dodac kontrole na max 2 klientow
-                    publish(BOARD_LOOK_TOPIC, getBoardLookMsg());
-                    publish(FIELD_REQUEST_TOPIC, FIELD_REQUEST);
-                } else System.out.println("OTHER GAME CONFIG:" + message.toString());
+            //todo: tmp
+            System.out.println(topic + " = " + message.toString());
+
+
+            String textMessage = message.toString();
+            if (topic.contains(MqttProperty.SPECIFIED_PLAYER_TOPICS)) {
+                if (messageFromCurrentPlayer(topic))
+                    checkTopicsForSpecifiedPlayer(topic, textMessage, getCurrentPlayer());
             }
-            System.out.println(topic + ": " + message.toString());
         }
 
+        private boolean messageFromCurrentPlayer(String topic) {
+            return signWitClientID.isEmpty() || topic.contains(signWitClientID.get(getCurrentPlayer()));
+
+//            int playerSignIndex = topic.indexOf(MqttProperty.SPECIFIED_PLAYER_TOPICS) + MqttProperty.SPECIFIED_PLAYER_TOPICS.length();
+//            return  == getCurrentPlayer();
+        }
+
+        private void checkTopicsForSpecifiedPlayer(String topic, String message, char player) {
+            if (topic.contains(MqttProperty.FIELD_TOPIC)) {
+                if (message.contains(MqttProperty.FIELD_CHOOSE_MSG))
+                    processFieldChooseMsg(message, player);
+            } else if (topic.contains(MqttProperty.PLAYER_PREPARATION_TOPIC)) {
+                if (message.contains(MqttProperty.CLIENT_CONNECTED_MSG))
+                    processClientConnectedMsg(player, message);
+                else if (message.equals(MqttProperty.RESTART_REPLY_MSG))
+                    processRestartReplyMsg(message);
+                else if (message.equals(MqttProperty.START_GAME)) {
+                    String topicPrefix = MqttProperty.SPECIFIED_PLAYER_TOPICS + "/" + signWitClientID.get(player);
+                    publish(topicPrefix + MqttProperty.PLAYER_PREPARATION_TOPIC, MqttProperty.START_GAME);
+                }
+            }
+        }
+
+        private void processFieldChooseMsg(String message, char player) {
+            String topicPrefix = MqttProperty.SPECIFIED_PLAYER_TOPICS + "/" + signWitClientID.get(player);
+            try {
+                String[] splitedMsg = message.split(MqttProperty.DELIMITER);
+                int column = Integer.parseInt(splitedMsg[1]);
+                nextTurn(column, player);
+            } catch (NumberFormatException e) {
+                publish(topicPrefix + MqttProperty.FIELD_TOPIC, MqttProperty.WRONG_COLUMN_MSG);
+                sendFieldRequestWithBoardMessage(player);
+            }
+        }
+
+        private String getBoardLookMsg() {
+            StringBuilder builder = new StringBuilder(Board.ROWS + MqttProperty.DELIMITER + Board.COLUMNS);
+            for (int row = 0; row < Board.ROWS; row++)
+                for (int col = 0; col < Board.COLUMNS; col++)
+                    builder.append(MqttProperty.DELIMITER).append(gameLogic.getBoard().getSign(row, col));
+            return builder.toString();
+        }
+
+        private void sendFieldRequestWithBoardMessage(char player) {
+            String topicPrefix = MqttProperty.SPECIFIED_PLAYER_TOPICS + "/" + signWitClientID.get(player);
+            publish(MqttProperty.BOARD_LOOK_TOPIC, getBoardLookMsg()); //todo: dac tylko dla poszczegolnych graczy
+            publish(topicPrefix + MqttProperty.FIELD_TOPIC, MqttProperty.FIELD_REQUEST_MSG);
+        }
+
+        private void processClientConnectedMsg(char player, String message) {
+            String[] splited = message.split(MqttProperty.DELIMITER);
+            char randomSign = getRandomAvailableSign();
+            signWitClientID.put(randomSign, splited[1]);
+
+            String topicPrefix = MqttProperty.SPECIFIED_PLAYER_TOPICS + "/" + signWitClientID.get(player);
+            String signMessage = MqttProperty.GIVEN_SIGN_MSG + MqttProperty.DELIMITER + randomSign;
+            publish(topicPrefix + MqttProperty.PLAYER_PREPARATION_TOPIC, signMessage);
+            sendFieldRequestWithBoardMessage(player);
+        }
+
+        //todo: dodac danie restartu gdy dwoje graczy sie zgodzi
+        private void processRestartReplyMsg(String message) {
+            String[] splited = message.split(MqttProperty.DELIMITER);
+            boolean restart = Boolean.parseBoolean(splited[1]);
+            finishOrRestartGame(restart);
+            sendFieldRequestWithBoardMessage(gameLogic.getNextPlayer());
+        }
 
         @Override
         public void deliveryComplete(IMqttDeliveryToken token) {
@@ -91,27 +119,83 @@ public class Controller {
     //----------------------------------------------------------------------------------------------------------------//
     public Controller(ConnectFour gameLogic) {
         this.gameLogic = gameLogic;
+        callbackHandler = new MqttCallbackHandler();
         availablePlayerSigns = new ArrayList<>(Arrays.asList(ConnectFour.FIRST_PLAYER, ConnectFour.SECOND_PLAYER));
+        signWitClientID = new HashMap<>(2);
     }
 
     public void connectToMqtt() {
         try {
-            broker = new MqttClient(SERVER_URI, MqttClient.generateClientId(), new MemoryPersistence());
-            broker.setCallback(new MqttCallbackHandler());
+            broker = new MqttClient(MqttProperty.SERVER_URI, MqttClient.generateClientId(), new MemoryPersistence());
+            broker.setCallback(callbackHandler);
             broker.connect();
-            broker.subscribe(FIELD_CHOOSE_TOPIC, QoS);
-            broker.subscribe(GAME_CONFIG_TOPIC, QoS);
+            broker.subscribe(MqttProperty.SPECIFIED_PLAYER_TOPICS + "/#", MqttProperty.QoS); //all topics from player
         } catch (MqttException e) {
-            internalError("Server can't connect with MQTT: " + e.getMessage());
+            criticalErrorAction("Can't connect with MQTT: " + e.getMessage());
         }
+    }
+
+    private void criticalErrorAction(String message) {
+        System.out.println(message);
+        publish(MqttProperty.SERVER_ERROR_TOPIC, message);
+        System.exit(1);
     }
 
     private void publish(String topic, String message) {
         try {
-            broker.publish(topic, message.getBytes(UTF_8), QoS, false);
+            broker.publish(topic, message.getBytes(UTF_8), MqttProperty.QoS, false);
         } catch (MqttException e) {
             System.out.println("Error while publishing message via MQTT protocol: " + e.getMessage());
             System.exit(1);
+        }
+    }
+
+    public void nextTurn(int col, char player) {
+        try {
+            gameLogic.dropDisc(col, player);
+        } catch (FullColumnException e) {
+            String topicPrefix = MqttProperty.SPECIFIED_PLAYER_TOPICS + "/" + signWitClientID.get(player);
+            publish(topicPrefix + MqttProperty.FIELD_TOPIC, MqttProperty.FULL_COLUMN_MSG);
+            callbackHandler.sendFieldRequestWithBoardMessage(player);
+            return;
+        } catch (WrongColumnOrRowException e) {
+            String topicPrefix = MqttProperty.SPECIFIED_PLAYER_TOPICS + "/" + signWitClientID.get(player);
+            publish(topicPrefix + MqttProperty.FIELD_TOPIC, MqttProperty.WRONG_COLUMN_MSG);
+            callbackHandler.sendFieldRequestWithBoardMessage(player);
+            return;
+        }
+        checkGameStatus(player);
+        gameLogic.changePlayer();
+    }
+
+    private void checkGameStatus(char player) {
+        char result = gameLogic.getResult();
+        if (result != ConnectFour.EMPTY) {
+            if (result == ConnectFour.DRAW)
+                publish(MqttProperty.RESULTS_TOPIC, MqttProperty.DRAW_MSG);
+            else
+                publish(MqttProperty.RESULTS_TOPIC, MqttProperty.WINNER_MSG + MqttProperty.DELIMITER + result);
+            publish(MqttProperty.BOARD_LOOK_TOPIC, callbackHandler.getBoardLookMsg());
+            String topicPlayer1 = MqttProperty.SPECIFIED_PLAYER_TOPICS + "/" + signWitClientID.get(getCurrentPlayer()) + MqttProperty.PLAYER_PREPARATION_TOPIC;
+            String topicPlayer2 = MqttProperty.SPECIFIED_PLAYER_TOPICS + "/" + signWitClientID.get(gameLogic.getNextPlayer()) + MqttProperty.PLAYER_PREPARATION_TOPIC;
+            publish(topicPlayer1, MqttProperty.RESTART_REQUEST_MSG);
+            publish(topicPlayer2, MqttProperty.RESTART_REQUEST_MSG);
+        } else {
+            char nextPlayer = player == ConnectFour.FIRST_PLAYER ? ConnectFour.SECOND_PLAYER : ConnectFour.FIRST_PLAYER;
+            callbackHandler.sendFieldRequestWithBoardMessage(nextPlayer);
+        }
+    }
+
+    private void finishOrRestartGame(boolean restart) {
+        if (restart) {
+            gameLogic.restartGame();
+            String player1Topic = MqttProperty.SPECIFIED_PLAYER_TOPICS + "/" + signWitClientID.get(getCurrentPlayer()) + MqttProperty.PLAYER_PREPARATION_TOPIC;
+            String player2Topic = MqttProperty.SPECIFIED_PLAYER_TOPICS + "/" + signWitClientID.get(gameLogic.getNextPlayer()) + MqttProperty.PLAYER_PREPARATION_TOPIC;
+            publish(player1Topic, MqttProperty.START_GAME);
+            publish(player2Topic, MqttProperty.START_GAME);
+        } else {
+            disconnect();
+            System.exit(0);
         }
     }
 
@@ -119,73 +203,13 @@ public class Controller {
         try {
             broker.disconnect();
         } catch (MqttException e) {
-            internalError("Can't disconnect with MQTT protocol: " + e.getMessage());
+            System.out.println("Can't disconnect with MQTT protocol: " + e.getMessage());
+            System.exit(1);
         }
-    }
-
-    public void nextTurn(int col) {
-        try {
-            gameLogic.dropDisc(col, gameLogic.getCurrentPlayer());
-        } catch (FullColumnException e) {
-            publish(GAME_EXCEPTION_TOPIC, FULL_COLUMN);
-            publish(BOARD_LOOK_TOPIC, getBoardLookMsg());
-            publish(FIELD_REQUEST_TOPIC, FIELD_REQUEST);
-            return;
-        } catch (WrongColumnOrRowException e) {
-            publish(GAME_EXCEPTION_TOPIC, WRONG_COLUMN);
-            publish(BOARD_LOOK_TOPIC, getBoardLookMsg());
-            publish(FIELD_REQUEST_TOPIC, FIELD_REQUEST);
-            return;
-        }
-        checkGameStatus();
-        gameLogic.changePlayer();
-    }
-
-    private void checkGameStatus() {
-        char result = gameLogic.getResult();
-        if (result != ConnectFour.EMPTY) {
-            if (result == ConnectFour.DRAW)
-                publish(GAME_RESULTS_TOPIC, DRAW);
-            else
-                publish(GAME_RESULTS_TOPIC, WINNER + MSG_DELIMITER + result);
-            publish(BOARD_LOOK_TOPIC, getBoardLookMsg());
-            publish(GAME_OTHERS_TOPIC, RESTART_GAME_REQUEST);
-        } else {
-            publish(BOARD_LOOK_TOPIC, getBoardLookMsg());
-            publish(FIELD_REQUEST_TOPIC, FIELD_REQUEST);
-        }
-    }
-
-    private void finishOrRestartGame(boolean restart) {
-        if (restart) {
-            gameLogic.restartGame();
-            publish(GAME_OTHERS_TOPIC, START_GAME);
-        } else {
-            disconnect();
-            System.exit(0);
-        }
-
     }
 
     public char getCurrentPlayer() {
         return gameLogic.getCurrentPlayer();
-    }
-
-    private void internalError(String msg) {
-        String message = "INTERNAL ERROR: " + msg;
-        System.out.println(message);
-        publish(SERVER_ERROR_TOPIC, message);
-        System.exit(1);
-    }
-
-
-    private String getBoardLookMsg() {
-        //todo: zoptymalizowac
-        String msg = Board.ROWS + MSG_DELIMITER + Board.COLUMNS;
-        for (int row = 0; row < Board.ROWS; row++)
-            for (int col = 0; col < Board.COLUMNS; col++)
-                msg += MSG_DELIMITER + gameLogic.getBoard().getSign(row, col);
-        return msg;
     }
 
     private char getRandomAvailableSign() {

@@ -24,41 +24,15 @@ public class MqttProperty {
     public static final String WINNER_MSG = "WINNER";
 
     //topics prefixes
-    private static final String THIS_PLAYER_TOPICS = "connect4/player";
+    public static final String SPECIFIED_PLAYER_TOPICS = "connect4/player";
     private static final String ALL_PLAYERS_TOPICS = "connect4/all";
 
-    //subscribed topics
+    //published topics
     public static final String RESULTS_TOPIC = ALL_PLAYERS_TOPICS + "/result";
     public static final String BOARD_LOOK_TOPIC = ALL_PLAYERS_TOPICS + "/board/look";
     public static final String SERVER_ERROR_TOPIC = ALL_PLAYERS_TOPICS + "/serverError";
 
     //published + subscribed
-    private static final String FIELD_TOPIC = "/board/field";
-    private static final String PLAYER_PREPARATION_TOPIC = "/preparation";
-
-    //----------------------------------------------------------------------------------------------------------------//
-    private char playerSign = '\0';
-    private String clientID;
-
-    //----------------------------------------------------------------------------------------------------------------//
-    public MqttProperty(String clientID) {
-        this.clientID = clientID;
-    }
-
-    //----------------------------------------------------------------------------------------------------------------//
-    public void setPlayerSign(char playerSign) {
-        this.playerSign = playerSign;
-    }
-
-    public char getPlayerSign() {
-        return playerSign;
-    }
-
-    public final String getFieldTopic() {
-        return THIS_PLAYER_TOPICS + "/" + clientID + FIELD_TOPIC;
-    }
-
-    public final String getPreparationTopic() {
-        return THIS_PLAYER_TOPICS + "/" + clientID + PLAYER_PREPARATION_TOPIC;
-    }
+    public static final String FIELD_TOPIC = "/board/field";
+    public static final String PLAYER_PREPARATION_TOPIC = "/preparation";
 }

@@ -16,7 +16,6 @@ public class Controller {
     //----------------------------------------------------------------------------------------------------------------//
     public Controller(GameCli gameCli) {
         this.gameCli = gameCli;
-        this.property = new MqttProperty();
     }
 
     //----------------------------------------------------------------------------------------------------------------//
@@ -29,17 +28,23 @@ public class Controller {
 
         @Override
         public void messageArrived(String topic, MqttMessage message) {
+            //todo: tmp
+            System.out.println(topic + " = " + message.toString());
+
+
             String textMessage = message.toString();
-            if (textMessage.equals(MqttProperty.BOARD_LOOK_TOPIC)) {
+            if (topic.equals(MqttProperty.BOARD_LOOK_TOPIC)) {
                 char[][] board = decodeBoardLookMsg(message.toString());
                 gameCli.setBoardColumnsQty(board[0].length);
                 gameCli.printBoard(board);
-            } else if (textMessage.equals(property.getFieldTopic()))
+            } else if (topic.equals(property.getFieldTopic()))
                 fieldTopicMsg(textMessage);
-            else if (textMessage.equals(MqttProperty.RESULTS_TOPIC))
+            else if (topic.equals(MqttProperty.RESULTS_TOPIC))
                 resultTopicMsg(textMessage);
-            else if (textMessage.equals(property.getPreparationTopic()))
+            else if (topic.equals(property.getPreparationTopic()))
                 preparationTopicMsg(textMessage);
+            else if (topic.equals(MqttProperty.SERVER_ERROR_TOPIC))
+                criticalErrorAction("Server internal error: " + textMessage);
         }
 
         private char[][] decodeBoardLookMsg(String msg) {
@@ -91,21 +96,15 @@ public class Controller {
             }
         }
 
-
         private void preparationTopicMsg(String message) {
-            switch (message) {
-                case MqttProperty.GIVEN_SIGN_MSG: {
-                    property.setPlayerSign(message.charAt(0));
-                    gameCli.printStartedMsg();
-                }
-                break;
-                case MqttProperty.START_GAME:
-                    gameCli.printStartedMsg();
-                    break;
-                case MqttProperty.RESTART_REQUEST_MSG:
-                    restartInput();
-                    break;
-            }
+            if (message.contains(MqttProperty.GIVEN_SIGN_MSG)) {
+                String[] splited = message.split(MqttProperty.DELIMITER);
+                property.setPlayerSign(splited[1].charAt(0));
+                gameCli.printStartedMsg();
+            } else if (message.equals(MqttProperty.START_GAME))
+                gameCli.printStartedMsg();
+            else if (message.equals(MqttProperty.RESTART_REQUEST_MSG))
+                restartInput();
         }
 
         @Override
@@ -118,7 +117,9 @@ public class Controller {
     //----------------------------------------------------------------------------------------------------------------//
     private void connectToMqtt() {
         try {
-            broker = new MqttClient(MqttProperty.SERVER_URI, MqttClient.generateClientId(), new MemoryPersistence());
+            String clientID = MqttClient.generateClientId();
+            broker = new MqttClient(MqttProperty.SERVER_URI, clientID, new MemoryPersistence());
+            this.property = new MqttProperty(clientID);
             broker.setCallback(new MqttCallbackHandler());
             broker.connect();
             subscribeTopics();
@@ -135,9 +136,11 @@ public class Controller {
 
     private void subscribeTopics() {
         try {
-            broker.subscribe(MqttProperty.RESULTS_TOPIC);
-            broker.subscribe(MqttProperty.BOARD_LOOK_TOPIC);
-            broker.subscribe(property.getPreparationTopic());
+            broker.subscribe(MqttProperty.RESULTS_TOPIC, MqttProperty.QoS);
+            broker.subscribe(MqttProperty.BOARD_LOOK_TOPIC, MqttProperty.QoS);
+            broker.subscribe(property.getPreparationTopic(), MqttProperty.QoS);
+            broker.subscribe(property.getFieldTopic(), MqttProperty.QoS);
+            broker.subscribe(MqttProperty.SERVER_ERROR_TOPIC, MqttProperty.QoS);
         } catch (MqttException e) {
             criticalErrorAction("Error while subscribing message via MQTT protocol: " + e.getMessage());
         }
@@ -153,7 +156,8 @@ public class Controller {
 
     public void startGame() {
         connectToMqtt();
-        publish(property.getPreparationTopic(), MqttProperty.CLIENT_CONNECTED_MSG);
+        String message = MqttProperty.CLIENT_CONNECTED_MSG + MqttProperty.DELIMITER + broker.getClientId();
+        publish(property.getPreparationTopic(), message);
     }
 
     private void restartInput() {
@@ -175,7 +179,7 @@ public class Controller {
 
     private void fieldChooseInput() {
         gameCli.printActualTurn(property.getPlayerSign());
-        publish(property.getFieldTopic(), Integer.toString(gameCli.readColumn()));
+        publish(property.getFieldTopic(), MqttProperty.FIELD_CHOOSE_MSG + MqttProperty.DELIMITER + gameCli.readColumn());
     }
 
 

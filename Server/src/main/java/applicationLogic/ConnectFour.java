@@ -54,7 +54,11 @@ public class ConnectFour {
     }
 
     public void changePlayer() {
-        currentPlayer = currentPlayer == FIRST_PLAYER ? SECOND_PLAYER : FIRST_PLAYER;
+        currentPlayer = getNextPlayer();
+    }
+
+    public char getNextPlayer() {
+        return currentPlayer == FIRST_PLAYER ? SECOND_PLAYER : FIRST_PLAYER;
     }
 
     public char getResult() {
