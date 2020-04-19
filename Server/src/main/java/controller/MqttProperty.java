@@ -11,6 +11,7 @@ public class MqttProperty {
     public static final String FULL_COLUMN_MSG = "FULL_COLUMN";
     public static final String FIELD_REQUEST_MSG = "FIELD_REQUEST";
     public static final String FIELD_CHOOSE_MSG = "FIELD_CHOOSE";
+    public static final String WAITING_FOR_PLAYER_MSG = "WAITING_FOR_PLAYER";
 
     //messages: preparation
     public static final String GIVEN_SIGN_MSG = "GIVEN_SIGN";

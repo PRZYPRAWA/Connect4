@@ -17,7 +17,7 @@ public class Controller {
     private IMqttClient broker;
     private MqttCallbackHandler callbackHandler;
 
-    private List<Character> availablePlayerSigns;
+    //    private List<Character> availablePlayerSigns;
     private Map<Character, String> signWitClientID;
 
     //----------------------------------------------------------------------------------------------------------------//
@@ -31,21 +31,25 @@ public class Controller {
         @Override
         public void messageArrived(String topic, MqttMessage message) {
             //todo: tmp
-            System.out.println(topic + " = " + message.toString());
+            System.out.println("SEC:" + messageFromCurrentPlayer(topic));
+            System.out.println("1) " + topic + " = " + message.toString());
 
-
+            //todo: dac komunikat ze juz jest 2 graczy
             String textMessage = message.toString();
-            if (topic.contains(MqttProperty.SPECIFIED_PLAYER_TOPICS)) {
-                if (messageFromCurrentPlayer(topic))
-                    checkTopicsForSpecifiedPlayer(topic, textMessage, getCurrentPlayer());
-            }
+            if (topic.contains(MqttProperty.SPECIFIED_PLAYER_TOPICS) && (messageFromCurrentPlayer(topic) || !isCorrectPlayersQty()))
+                checkTopicsForSpecifiedPlayer(topic, textMessage, getCurrentPlayer());
         }
 
         private boolean messageFromCurrentPlayer(String topic) {
-            return signWitClientID.isEmpty() || topic.contains(signWitClientID.get(getCurrentPlayer()));
+            String currentPlayerID;
+            if (signWitClientID.get(getCurrentPlayer()) == null)
+                currentPlayerID = "null";
+            else currentPlayerID = signWitClientID.get(getCurrentPlayer());
+            return topic.contains(currentPlayerID);
+        }
 
-//            int playerSignIndex = topic.indexOf(MqttProperty.SPECIFIED_PLAYER_TOPICS) + MqttProperty.SPECIFIED_PLAYER_TOPICS.length();
-//            return  == getCurrentPlayer();
+        private boolean isCorrectPlayersQty() {
+            return signWitClientID.size() == 2;
         }
 
         private void checkTopicsForSpecifiedPlayer(String topic, String message, char player) {
@@ -92,13 +96,20 @@ public class Controller {
 
         private void processClientConnectedMsg(char player, String message) {
             String[] splited = message.split(MqttProperty.DELIMITER);
-            char randomSign = getRandomAvailableSign();
-            signWitClientID.put(randomSign, splited[1]);
+//            char randomSign = getRandomAvailableSign();
+            signWitClientID.put(player, splited[1]);
 
             String topicPrefix = MqttProperty.SPECIFIED_PLAYER_TOPICS + "/" + signWitClientID.get(player);
-            String signMessage = MqttProperty.GIVEN_SIGN_MSG + MqttProperty.DELIMITER + randomSign;
+            String signMessage = MqttProperty.GIVEN_SIGN_MSG + MqttProperty.DELIMITER + player;
             publish(topicPrefix + MqttProperty.PLAYER_PREPARATION_TOPIC, signMessage);
-            sendFieldRequestWithBoardMessage(player);
+
+            if (!isCorrectPlayersQty()) {
+                publish(topicPrefix + MqttProperty.PLAYER_PREPARATION_TOPIC, MqttProperty.WAITING_FOR_PLAYER_MSG);
+                gameLogic.changePlayer();
+            } else {
+                gameLogic.changePlayer();
+                sendFieldRequestWithBoardMessage(getCurrentPlayer());
+            }
         }
 
         //todo: dodac danie restartu gdy dwoje graczy sie zgodzi
@@ -120,7 +131,7 @@ public class Controller {
     public Controller(ConnectFour gameLogic) {
         this.gameLogic = gameLogic;
         callbackHandler = new MqttCallbackHandler();
-        availablePlayerSigns = new ArrayList<>(Arrays.asList(ConnectFour.FIRST_PLAYER, ConnectFour.SECOND_PLAYER));
+//        availablePlayerSigns = new ArrayList<>(Arrays.asList(ConnectFour.FIRST_PLAYER, ConnectFour.SECOND_PLAYER));
         signWitClientID = new HashMap<>(2);
     }
 
@@ -212,11 +223,11 @@ public class Controller {
         return gameLogic.getCurrentPlayer();
     }
 
-    private char getRandomAvailableSign() {
-        int randIndex = (int) (Math.random() * availablePlayerSigns.size());
-        char sign = availablePlayerSigns.get(randIndex);
-        availablePlayerSigns.remove(randIndex);
-        return sign;
-    }
+//    private char getRandomAvailableSign() {
+//        int randIndex = (int) (Math.random() * availablePlayerSigns.size());
+//        char sign = availablePlayerSigns.get(randIndex);
+//        availablePlayerSigns.remove(randIndex);
+//        return sign;
+//    }
 
 }

@@ -97,7 +97,9 @@ public class Controller {
         }
 
         private void preparationTopicMsg(String message) {
-            if (message.contains(MqttProperty.GIVEN_SIGN_MSG)) {
+            if (message.equals(MqttProperty.WAITING_FOR_PLAYER_MSG)) {
+                gameCli.printWaitingForPlayers();
+            } else if (message.contains(MqttProperty.GIVEN_SIGN_MSG)) {
                 String[] splited = message.split(MqttProperty.DELIMITER);
                 property.setPlayerSign(splited[1].charAt(0));
                 gameCli.printStartedMsg();

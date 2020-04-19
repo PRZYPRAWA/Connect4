@@ -43,7 +43,6 @@ public class GameCli {
         printlnCentered(WRONG_COLUMN_MSG, RED_BOLD);
     }
 
-
     public void printBoard(char[][] board) {
         for (int row = 0; row < board.length; row++) {
             consoleOut.print(BOARD_COLOR + COLUMN_DELIMITER + BOARD_MIDDLE_FRAME + RESET);
@@ -55,7 +54,6 @@ public class GameCli {
         }
         printBoardFooter();
     }
-
 
     private void printBoardSign(char sign) {
         if (sign == Controller.FIRST_PLAYER_SIGN)
@@ -167,5 +165,9 @@ public class GameCli {
     public void waitForAnyInput() {
         consoleOut.println("Press any button to continue ...");
         consoleIn.nextLine();
+    }
+
+    public void printWaitingForPlayers() {
+        printlnCentered("Lobby: waiting for another player to start a game...", FIRST_PLAYER_COLOR);
     }
 }

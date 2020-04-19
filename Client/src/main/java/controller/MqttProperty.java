@@ -18,6 +18,7 @@ public class MqttProperty {
     public static final String RESTART_REPLY_MSG = "RESTART_REPLY";
     public static final String CLIENT_CONNECTED_MSG = "CLIENT_CONNECTED";
     public static final String START_GAME = "START_GAME";
+    public static final String WAITING_FOR_PLAYER_MSG = "WAITING_FOR_PLAYER";
 
     //messages: results
     public static final String DRAW_MSG = "DRAW";
