@@ -170,4 +170,9 @@ public class GameCli {
     public void printWaitingForPlayers() {
         printlnCentered("Lobby: waiting for another player to start a game...", FIRST_PLAYER_COLOR);
     }
+
+    public void printEndGame() {
+        printlnCentered("Game is finished", FIRST_PLAYER_COLOR);
+        printlnCentered("Authors: Lukasz Gajerski, Pawel Piotrowski", INPUT_COLOR);
+    }
 }

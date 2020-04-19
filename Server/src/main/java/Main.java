@@ -1,8 +1,8 @@
 import applicationLogic.ConnectFour;
-import controller.Controller;
+import controller.Server;
 
 public class Main {
     public static void main(String[] args) {
-        new Controller(new ConnectFour()).connectToMqtt();
+        new Server(new ConnectFour()).connectToMqtt();
     }
 }

@@ -26,22 +26,20 @@ public class Controller {
             //Called when the client lost the connection to the broker
         }
 
+        //todo: refactor
+
         @Override
         public void messageArrived(String topic, MqttMessage message) {
-            //todo: tmp
-            System.out.println(topic + " = " + message.toString());
-
-
             String textMessage = message.toString();
             if (topic.equals(MqttProperty.BOARD_LOOK_TOPIC)) {
                 char[][] board = decodeBoardLookMsg(message.toString());
                 gameCli.setBoardColumnsQty(board[0].length);
                 gameCli.printBoard(board);
-            } else if (topic.equals(property.getFieldTopic()))
+            } else if (topic.equals(property.getFieldTopic()) || topic.equals(MqttProperty.ALL_PLAYERS_TOPICS + MqttProperty.FIELD_TOPIC))
                 fieldTopicMsg(textMessage);
             else if (topic.equals(MqttProperty.RESULTS_TOPIC))
                 resultTopicMsg(textMessage);
-            else if (topic.equals(property.getPreparationTopic()))
+            else if (topic.equals(property.getPreparationTopic()) || topic.equals(MqttProperty.ALL_PLAYERS_TOPICS + MqttProperty.PLAYER_PREPARATION_TOPIC))
                 preparationTopicMsg(textMessage);
             else if (topic.equals(MqttProperty.SERVER_ERROR_TOPIC))
                 criticalErrorAction("Server internal error: " + textMessage);
@@ -79,6 +77,9 @@ public class Controller {
                     gameCli.printWinnerMsg(decoded[1].charAt(0));
                 }
                 break;
+                case MqttProperty.END_GAME:
+                    disconnect();
+                    break;
             }
         }
 
@@ -105,8 +106,10 @@ public class Controller {
                 gameCli.printStartedMsg();
             } else if (message.equals(MqttProperty.START_GAME))
                 gameCli.printStartedMsg();
-            else if (message.equals(MqttProperty.RESTART_REQUEST_MSG))
-                restartInput();
+            else if (message.equals(MqttProperty.RESTART_REQUEST_MSG)) {
+                boolean restart = gameCli.restartGameInput();
+                publish(property.getPreparationTopic(), MqttProperty.RESTART_REPLY_MSG + MqttProperty.DELIMITER + restart);
+            }
         }
 
         @Override
@@ -138,11 +141,13 @@ public class Controller {
 
     private void subscribeTopics() {
         try {
-            broker.subscribe(MqttProperty.RESULTS_TOPIC, MqttProperty.QoS);
-            broker.subscribe(MqttProperty.BOARD_LOOK_TOPIC, MqttProperty.QoS);
-            broker.subscribe(property.getPreparationTopic(), MqttProperty.QoS);
-            broker.subscribe(property.getFieldTopic(), MqttProperty.QoS);
-            broker.subscribe(MqttProperty.SERVER_ERROR_TOPIC, MqttProperty.QoS);
+//            broker.subscribe(MqttProperty.RESULTS_TOPIC, MqttProperty.QoS);
+//            broker.subscribe(MqttProperty.BOARD_LOOK_TOPIC, MqttProperty.QoS);
+//            broker.subscribe(property.getPreparationTopic(), MqttProperty.QoS);
+//            broker.subscribe(property.getFieldTopic(), MqttProperty.QoS);
+//            broker.subscribe(MqttProperty.SERVER_ERROR_TOPIC, MqttProperty.QoS);
+            broker.subscribe(MqttProperty.THIS_PLAYER_TOPICS + "/#");
+            broker.subscribe(MqttProperty.ALL_PLAYERS_TOPICS + "/#");
         } catch (MqttException e) {
             criticalErrorAction("Error while subscribing message via MQTT protocol: " + e.getMessage());
         }
@@ -162,17 +167,9 @@ public class Controller {
         publish(property.getPreparationTopic(), message);
     }
 
-    private void restartInput() {
-        boolean restart = gameCli.restartGameInput();
-        publish(property.getPreparationTopic(), MqttProperty.RESTART_REPLY_MSG + MqttProperty.DELIMITER + restart);
-        if (!restart) {
-//            disconnect(); //todo: daje wyjątek (?)
-            System.exit(0);
-        }
-    }
-
     private void disconnect() {
         try {
+            gameCli.printEndGame();
             broker.disconnect();
         } catch (MqttException e) {
             gameCli.connectionError("Can't disconnect with MQTT protocol: " + e.getMessage());

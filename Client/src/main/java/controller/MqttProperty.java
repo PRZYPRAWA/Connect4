@@ -23,10 +23,11 @@ public class MqttProperty {
     //messages: results
     public static final String DRAW_MSG = "DRAW";
     public static final String WINNER_MSG = "WINNER";
+    public static final String END_GAME = "END_GAME";
 
     //topics prefixes
-    private static final String THIS_PLAYER_TOPICS = "connect4/player";
-    private static final String ALL_PLAYERS_TOPICS = "connect4/all";
+    public static final String THIS_PLAYER_TOPICS = "connect4/player";
+    public static final String ALL_PLAYERS_TOPICS = "connect4/all";
 
     //subscribed topics
     public static final String RESULTS_TOPIC = ALL_PLAYERS_TOPICS + "/result";
@@ -34,8 +35,8 @@ public class MqttProperty {
     public static final String SERVER_ERROR_TOPIC = ALL_PLAYERS_TOPICS + "/serverError";
 
     //published + subscribed
-    private static final String FIELD_TOPIC = "/board/field";
-    private static final String PLAYER_PREPARATION_TOPIC = "/preparation";
+    public static final String FIELD_TOPIC = "/board/field";
+    public static final String PLAYER_PREPARATION_TOPIC = "/preparation";
 
     //----------------------------------------------------------------------------------------------------------------//
     private char playerSign = '\0';

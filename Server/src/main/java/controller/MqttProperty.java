@@ -23,10 +23,11 @@ public class MqttProperty {
     //messages: results
     public static final String DRAW_MSG = "DRAW";
     public static final String WINNER_MSG = "WINNER";
+    public static final String END_GAME = "END_GAME";
 
     //topics prefixes
     public static final String SPECIFIED_PLAYER_TOPICS = "connect4/player";
-    private static final String ALL_PLAYERS_TOPICS = "connect4/all";
+    public static final String ALL_PLAYERS_TOPICS = "connect4/all";
 
     //published topics
     public static final String RESULTS_TOPIC = ALL_PLAYERS_TOPICS + "/result";

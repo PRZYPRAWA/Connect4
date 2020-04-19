@@ -12,13 +12,13 @@ import java.util.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 //todo: fix tests
-public class Controller {
+public class Server {
     private ConnectFour gameLogic;
     private IMqttClient broker;
     private MqttCallbackHandler callbackHandler;
 
-    //    private List<Character> availablePlayerSigns;
     private Map<Character, String> signWitClientID;
+    private boolean atLeastOnePlayerWantRestart = false;
 
     //----------------------------------------------------------------------------------------------------------------//
     private class MqttCallbackHandler implements MqttCallback {
@@ -30,20 +30,16 @@ public class Controller {
 
         @Override
         public void messageArrived(String topic, MqttMessage message) {
-            //todo: tmp
-            System.out.println("SEC:" + messageFromCurrentPlayer(topic));
-            System.out.println("1) " + topic + " = " + message.toString());
-
             //todo: dac komunikat ze juz jest 2 graczy
             String textMessage = message.toString();
-            if (topic.contains(MqttProperty.SPECIFIED_PLAYER_TOPICS) && (messageFromCurrentPlayer(topic) || !isCorrectPlayersQty()))
+            if (topic.contains(MqttProperty.SPECIFIED_PLAYER_TOPICS) && (messageFromCurrentPlayer(topic) || !isCorrectPlayersQty() || (gameLogic.getResult() != ConnectFour.EMPTY)))
                 checkTopicsForSpecifiedPlayer(topic, textMessage, getCurrentPlayer());
         }
 
         private boolean messageFromCurrentPlayer(String topic) {
             String currentPlayerID;
             if (signWitClientID.get(getCurrentPlayer()) == null)
-                currentPlayerID = "null";
+                currentPlayerID = "null"; //todo: poprawic
             else currentPlayerID = signWitClientID.get(getCurrentPlayer());
             return topic.contains(currentPlayerID);
         }
@@ -59,7 +55,7 @@ public class Controller {
             } else if (topic.contains(MqttProperty.PLAYER_PREPARATION_TOPIC)) {
                 if (message.contains(MqttProperty.CLIENT_CONNECTED_MSG))
                     processClientConnectedMsg(player, message);
-                else if (message.equals(MqttProperty.RESTART_REPLY_MSG))
+                else if (message.contains(MqttProperty.RESTART_REPLY_MSG))
                     processRestartReplyMsg(message);
                 else if (message.equals(MqttProperty.START_GAME)) {
                     String topicPrefix = MqttProperty.SPECIFIED_PLAYER_TOPICS + "/" + signWitClientID.get(player);
@@ -96,7 +92,6 @@ public class Controller {
 
         private void processClientConnectedMsg(char player, String message) {
             String[] splited = message.split(MqttProperty.DELIMITER);
-//            char randomSign = getRandomAvailableSign();
             signWitClientID.put(player, splited[1]);
 
             String topicPrefix = MqttProperty.SPECIFIED_PLAYER_TOPICS + "/" + signWitClientID.get(player);
@@ -106,18 +101,18 @@ public class Controller {
             if (!isCorrectPlayersQty()) {
                 publish(topicPrefix + MqttProperty.PLAYER_PREPARATION_TOPIC, MqttProperty.WAITING_FOR_PLAYER_MSG);
                 gameLogic.changePlayer();
-            } else {
-                gameLogic.changePlayer();
-                sendFieldRequestWithBoardMessage(getCurrentPlayer());
-            }
+            } else sendFieldRequestWithBoardMessage(getCurrentPlayer());
         }
 
-        //todo: dodac danie restartu gdy dwoje graczy sie zgodzi
         private void processRestartReplyMsg(String message) {
             String[] splited = message.split(MqttProperty.DELIMITER);
             boolean restart = Boolean.parseBoolean(splited[1]);
-            finishOrRestartGame(restart);
-            sendFieldRequestWithBoardMessage(gameLogic.getNextPlayer());
+            if (restart) {
+                if (!atLeastOnePlayerWantRestart)
+                    atLeastOnePlayerWantRestart = true;
+                else restartGame(); //both player confirm restart request
+            } else
+                disconnect();
         }
 
         @Override
@@ -128,10 +123,9 @@ public class Controller {
     }
 
     //----------------------------------------------------------------------------------------------------------------//
-    public Controller(ConnectFour gameLogic) {
+    public Server(ConnectFour gameLogic) {
         this.gameLogic = gameLogic;
         callbackHandler = new MqttCallbackHandler();
-//        availablePlayerSigns = new ArrayList<>(Arrays.asList(ConnectFour.FIRST_PLAYER, ConnectFour.SECOND_PLAYER));
         signWitClientID = new HashMap<>(2);
     }
 
@@ -176,7 +170,6 @@ public class Controller {
             return;
         }
         checkGameStatus(player);
-        gameLogic.changePlayer();
     }
 
     private void checkGameStatus(char player) {
@@ -187,31 +180,26 @@ public class Controller {
             else
                 publish(MqttProperty.RESULTS_TOPIC, MqttProperty.WINNER_MSG + MqttProperty.DELIMITER + result);
             publish(MqttProperty.BOARD_LOOK_TOPIC, callbackHandler.getBoardLookMsg());
-            String topicPlayer1 = MqttProperty.SPECIFIED_PLAYER_TOPICS + "/" + signWitClientID.get(getCurrentPlayer()) + MqttProperty.PLAYER_PREPARATION_TOPIC;
-            String topicPlayer2 = MqttProperty.SPECIFIED_PLAYER_TOPICS + "/" + signWitClientID.get(gameLogic.getNextPlayer()) + MqttProperty.PLAYER_PREPARATION_TOPIC;
-            publish(topicPlayer1, MqttProperty.RESTART_REQUEST_MSG);
-            publish(topicPlayer2, MqttProperty.RESTART_REQUEST_MSG);
+            publish(MqttProperty.ALL_PLAYERS_TOPICS + MqttProperty.PLAYER_PREPARATION_TOPIC, MqttProperty.RESTART_REQUEST_MSG);
         } else {
-            char nextPlayer = player == ConnectFour.FIRST_PLAYER ? ConnectFour.SECOND_PLAYER : ConnectFour.FIRST_PLAYER;
-            callbackHandler.sendFieldRequestWithBoardMessage(nextPlayer);
+            gameLogic.changePlayer();
+            callbackHandler.sendFieldRequestWithBoardMessage(getCurrentPlayer());
         }
     }
 
-    private void finishOrRestartGame(boolean restart) {
-        if (restart) {
-            gameLogic.restartGame();
-            String player1Topic = MqttProperty.SPECIFIED_PLAYER_TOPICS + "/" + signWitClientID.get(getCurrentPlayer()) + MqttProperty.PLAYER_PREPARATION_TOPIC;
-            String player2Topic = MqttProperty.SPECIFIED_PLAYER_TOPICS + "/" + signWitClientID.get(gameLogic.getNextPlayer()) + MqttProperty.PLAYER_PREPARATION_TOPIC;
-            publish(player1Topic, MqttProperty.START_GAME);
-            publish(player2Topic, MqttProperty.START_GAME);
-        } else {
-            disconnect();
-            System.exit(0);
-        }
+    //todo: pozamieniac player w param na currentPlayer
+
+    private void restartGame() {
+        gameLogic.restartGame();
+        publish(MqttProperty.ALL_PLAYERS_TOPICS + MqttProperty.PLAYER_PREPARATION_TOPIC, MqttProperty.START_GAME);
+        callbackHandler.sendFieldRequestWithBoardMessage(getCurrentPlayer());
     }
 
+
+    //todo: nei dziala
     private void disconnect() {
         try {
+            publish(MqttProperty.RESULTS_TOPIC, MqttProperty.END_GAME);
             broker.disconnect();
         } catch (MqttException e) {
             System.out.println("Can't disconnect with MQTT protocol: " + e.getMessage());
@@ -222,12 +210,4 @@ public class Controller {
     public char getCurrentPlayer() {
         return gameLogic.getCurrentPlayer();
     }
-
-//    private char getRandomAvailableSign() {
-//        int randIndex = (int) (Math.random() * availablePlayerSigns.size());
-//        char sign = availablePlayerSigns.get(randIndex);
-//        availablePlayerSigns.remove(randIndex);
-//        return sign;
-//    }
-
 }
