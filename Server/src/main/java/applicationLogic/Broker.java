@@ -75,15 +75,4 @@ public class Broker {
             System.exit(1);
         }
     }
-
-    //todo: nei dziala
-    public void disconnect() {
-        try {
-            publish(Broker.RESULTS_TOP, Broker.END_GAME);
-            broker.disconnect();
-        } catch (MqttException e) {
-            System.out.println("Can't disconnect with MQTT protocol: " + e.getMessage());
-            System.exit(1);
-        }
-    }
 }

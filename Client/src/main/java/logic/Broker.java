@@ -93,16 +93,6 @@ public class Broker {
         }
     }
 
-    //todo: nie dziala (?)
-    public void disconnect() {
-        try {
-            gameCli.printEndGame();
-            broker.disconnect();
-        } catch (MqttException e) {
-            gameCli.connectionError("Can't disconnect with MQTT protocol: " + e.getMessage());
-        }
-    }
-
     public String getClientId() {
         return broker.getClientId();
     }

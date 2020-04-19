@@ -14,6 +14,8 @@ public class GameCli {
     private static final String SECOND_PLAYER_COLOR = BLACK_BOLD + YELLOW_BACKGROUND;
     private static final String BOARD_COLOR = BLACK_BOLD + GREEN_BACKGROUND;
     private static final String INPUT_COLOR = PURPLE_BRIGHT;
+    private static final String CREDITS_COLOR = BLACK_BOLD + CYAN_BACKGROUND;
+    private static final String AUTHORS_COLOR = GREEN_BOLD;
     private static final int DEFAULT_COLUMNS_QTY = 6;
 
     private PrintStream consoleOut = System.out;
@@ -177,7 +179,16 @@ public class GameCli {
     }
 
     public void printEndGame() {
-        printlnCentered("Game is finished", FIRST_PLAYER_COLOR);
-        printlnCentered("Authors: Lukasz Gajerski, Pawel Piotrowski", INPUT_COLOR);
+        consoleOut.println();
+        printlnCentered("Game is finished", CREDITS_COLOR);
+        printlnCentered("At least one player refused to play again", WHITE);
+        consoleOut.println();
+        printlnCentered("Thank you for game!", BOARD_COLOR);
+        consoleOut.println();
+        printlnCentered("Authors:", CREDITS_COLOR);
+        consoleOut.println();
+        printlnCentered("Lukasz Gajerski (www.github.com/Ukasz09)", AUTHORS_COLOR);
+        printlnCentered("Pawel Piotrowski (www.github.com/PRZYPRAWA)", AUTHORS_COLOR);
+        consoleOut.println();
     }
 }

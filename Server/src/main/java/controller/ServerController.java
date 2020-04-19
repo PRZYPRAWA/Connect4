@@ -26,6 +26,7 @@ public class ServerController implements MqttCallback {
     //----------------------------------------------------------------------------------------------------------------//
     public void run() {
         broker.connect(this);
+        System.out.println("Server is running now...");
     }
 
     @Override
@@ -115,8 +116,11 @@ public class ServerController implements MqttCallback {
             if (!atLeastOnePlayerWantRestart)
                 atLeastOnePlayerWantRestart = true;
             else restartGame(); //both player confirm restart request
-        } else
-            broker.disconnect();
+        } else {
+            broker.publish(Broker.ALL_PLAYERS_TOP + Broker.RESULTS_TOP, Broker.END_GAME);
+            System.out.println("Server is down");
+            System.exit(0);
+        }
     }
 
     private void restartGame() {

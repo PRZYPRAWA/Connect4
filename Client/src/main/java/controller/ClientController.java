@@ -87,8 +87,10 @@ public class ClientController implements MqttCallback {
         else if (message.contains(Broker.WINNER_MSG)) {
             String[] decoded = message.split(Broker.DELIMITER);
             gameCli.printWinnerMsg(decoded[1].charAt(0));
-        } else if (message.equals(Broker.END_GAME))
-            broker.disconnect();
+        } else if (message.equals(Broker.END_GAME)) {
+            gameCli.printEndGame();
+            System.exit(0);
+        }
     }
 
     private void preparationTopicMsg(String message) {
