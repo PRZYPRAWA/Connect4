@@ -1,6 +1,6 @@
 package ui;
 
-import controller.Controller;
+import controller.ClientController;
 
 import static ui.ConsoleColors.*;
 
@@ -14,10 +14,11 @@ public class GameCli {
     private static final String SECOND_PLAYER_COLOR = BLACK_BOLD + YELLOW_BACKGROUND;
     private static final String BOARD_COLOR = BLACK_BOLD + GREEN_BACKGROUND;
     private static final String INPUT_COLOR = PURPLE_BRIGHT;
+    private static final int DEFAULT_COLUMNS_QTY = 6;
 
     private PrintStream consoleOut = System.out;
     private Scanner consoleIn = new Scanner(System.in);
-    private int columnsQty = 0;
+    private int columnsQty = DEFAULT_COLUMNS_QTY;
 
     //----------------------------------------------------------------------------------------------------------------//
     public void setBoardColumnsQty(int boardColumnsQty) {
@@ -56,9 +57,9 @@ public class GameCli {
     }
 
     private void printBoardSign(char sign) {
-        if (sign == Controller.FIRST_PLAYER_SIGN)
+        if (sign == ClientController.FIRST_PLAYER_SIGN)
             consoleOut.print(FIRST_PLAYER_COLOR + sign + RESET);
-        else if (sign == Controller.SECOND_PLAYER_SIGN)
+        else if (sign == ClientController.SECOND_PLAYER_SIGN)
             consoleOut.print(SECOND_PLAYER_COLOR + sign + RESET);
         else consoleOut.print(" ");
     }
@@ -102,10 +103,13 @@ public class GameCli {
         }
     }
 
-    public void printActualTurn(char actualPlayerSign) {
+    public void printActualTurn(String actualPlayerSign) {
         consoleOut.println(BLUE + getBoardFooter() + RESET);
         printCentered("Player turn: ", WHITE);
-        printBoardSign(actualPlayerSign);
+        if (actualPlayerSign.length() > 1)
+            consoleOut.println(INPUT_COLOR + actualPlayerSign);
+        else
+            printBoardSign(actualPlayerSign.charAt(0));
         consoleOut.println();
         consoleOut.println(BLUE + getBoardFooter() + RESET);
         consoleOut.println();

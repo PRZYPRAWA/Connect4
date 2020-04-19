@@ -1,4 +1,4 @@
-package controller;
+package applicationLogic;
 
 import org.eclipse.paho.client.mqttv3.IMqttClient;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -33,18 +33,19 @@ public class Broker {
     public static final String WINNER_MSG = "WINNER";
     public static final String END_GAME = "END_GAME";
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //topics prefixes
-    public static final String SPECIFIED_PLAYER_TOPICS = "connect4/player";
-    public static final String ALL_PLAYERS_TOPICS = "connect4/all";
+    public static final String SPECIF_PLAYER_TOP = "connect4/player/";
+    public static final String ALL_PLAYERS_TOP = "connect4/all/";
 
     //published topics
-    public static final String RESULTS_TOPIC = ALL_PLAYERS_TOPICS + "/result";
-    public static final String BOARD_LOOK_TOPIC = ALL_PLAYERS_TOPICS + "/board/look";
-    public static final String SERVER_ERROR_TOPIC = ALL_PLAYERS_TOPICS + "/serverError";
+    public static final String RESULTS_TOP = "result";
+    public static final String BOARD_TOP = "board/look";
+    public static final String ERROR_TOP = "serverError";
 
     //published + subscribed
-    public static final String FIELD_TOPIC = "/board/field";
-    public static final String PLAYER_PREPARATION_TOPIC = "/preparation";
+    public static final String FIELD_TOP = "board/field";
+    public static final String PREPARE_TOP = "preparation";
 
     //----------------------------------------------------------------------------------------------------------------//
     private IMqttClient broker;
@@ -55,7 +56,7 @@ public class Broker {
             broker = new MqttClient(Broker.SERVER_URI, MqttClient.generateClientId(), new MemoryPersistence());
             broker.setCallback(callback);
             broker.connect();
-            broker.subscribe(Broker.SPECIFIED_PLAYER_TOPICS + "/#", Broker.QoS); //all topics from player
+            broker.subscribe(Broker.SPECIF_PLAYER_TOP + "#", Broker.QoS); //all topics from player
         } catch (MqttException e) {
             criticalErrorAction("Can't connect with MQTT: " + e.getMessage());
         }
@@ -63,7 +64,7 @@ public class Broker {
 
     private void criticalErrorAction(String message) {
         System.err.println(message);
-        publish(Broker.SERVER_ERROR_TOPIC, message);
+        publish(Broker.ERROR_TOP, message);
         System.exit(1);
     }
 
@@ -79,7 +80,7 @@ public class Broker {
     //todo: nei dziala
     public void disconnect() {
         try {
-            publish(Broker.RESULTS_TOPIC, Broker.END_GAME);
+            publish(Broker.RESULTS_TOP, Broker.END_GAME);
             broker.disconnect();
         } catch (MqttException e) {
             System.out.println("Can't disconnect with MQTT protocol: " + e.getMessage());

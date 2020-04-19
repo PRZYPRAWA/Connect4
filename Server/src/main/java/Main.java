@@ -1,8 +1,8 @@
 import applicationLogic.ConnectFour;
-import controller.Server;
+import controller.ServerController;
 
 public class Main {
     public static void main(String[] args) {
-        new Server(new ConnectFour()).run();
+        new ServerController(new ConnectFour()).run();
     }
 }
