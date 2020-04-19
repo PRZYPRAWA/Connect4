@@ -106,9 +106,10 @@ public class GameCli {
     public void printActualTurn(String actualPlayerSign) {
         consoleOut.println(BLUE + getBoardFooter() + RESET);
         printCentered("Player turn: ", WHITE);
-        if (actualPlayerSign.length() > 1)
-            consoleOut.println(INPUT_COLOR + actualPlayerSign);
-        else
+        if (actualPlayerSign.length() > 1) {
+            consoleOut.println();
+            printCentered(actualPlayerSign, CYAN_BOLD);
+        } else
             printBoardSign(actualPlayerSign.charAt(0));
         consoleOut.println();
         consoleOut.println(BLUE + getBoardFooter() + RESET);

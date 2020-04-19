@@ -6,9 +6,8 @@ import ui.GameCli;
 
 public class ClientController implements MqttCallback {
     public final static char FIRST_PLAYER_SIGN = 'X', SECOND_PLAYER_SIGN = 'Q', DRAW_SIGN = 'd'; //EMPTY = 'o',
-//    private char playerSign = '\0';
 
-    private String actualPlayerTurn = "NOONE";
+    private String actualPlayerTurn = "NO-ONE";
     private GameCli gameCli;
     private Broker broker;
 
@@ -95,11 +94,6 @@ public class ClientController implements MqttCallback {
     private void preparationTopicMsg(String message) {
         if (message.equals(Broker.WAITING_FOR_PLAYER_MSG))
             gameCli.printWaitingForPlayers();
-//        else if (message.contains(Broker.GIVEN_SIGN_MSG)) {
-//            String[] splited = message.split(Broker.DELIMITER);
-//            playerSign = splited[1].charAt(0);
-//            gameCli.printStartedMsg();
-//        }
         else if (message.equals(Broker.START_GAME))
             gameCli.printStartedMsg();
         else if (message.equals(Broker.RESTART_REQUEST_MSG)) {

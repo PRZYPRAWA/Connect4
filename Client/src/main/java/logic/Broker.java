@@ -23,7 +23,6 @@ public class Broker {
     public static final String WAITING_FOR_PLAYER_MSG = "WAITING_FOR_PLAYER";
 
     //messages: preparation
-    public static final String GIVEN_SIGN_MSG = "GIVEN_SIGN";
     public static final String RESTART_REQUEST_MSG = "RESTART_REQUEST";
     public static final String RESTART_REPLY_MSG = "RESTART_REPLY";
     public static final String CLIENT_CONNECTED_MSG = "CLIENT_CONNECTED";

@@ -99,7 +99,6 @@ public class ServerController implements MqttCallback {
         String[] splited = message.split(Broker.DELIMITER);
         inGameClients.put(getCurrentPlayer(), splited[1]);
 
-        broker.publish(getPlayerTopic(getCurrentPlayer()) + Broker.PREPARE_TOP, Broker.GIVEN_SIGN_MSG + Broker.DELIMITER + getCurrentPlayer());
         if (inGameClients.size() < 2) { //need to wait for another player
             broker.publish(getPlayerTopic(getCurrentPlayer()) + Broker.PREPARE_TOP, Broker.WAITING_FOR_PLAYER_MSG);
             gameLogic.changePlayer();
@@ -122,8 +121,10 @@ public class ServerController implements MqttCallback {
 
     private void restartGame() {
         gameLogic.restartGame();
+        atLeastOnePlayerWantRestart = false;
         broker.publish(Broker.ALL_PLAYERS_TOP + Broker.PREPARE_TOP, Broker.START_GAME);
-        publishBoardWithFieldMsg(getCurrentPlayer());
+        broker.publish(Broker.ALL_PLAYERS_TOP + Broker.BOARD_TOP, getBoardLookMsg(Character.toString(getCurrentPlayer())));
+        broker.publish(getPlayerTopic(getCurrentPlayer()) + Broker.FIELD_TOP, Broker.FIELD_REQUEST_MSG);
     }
 
     private void nextTurn(int col) {
@@ -158,7 +159,7 @@ public class ServerController implements MqttCallback {
             broker.publish(Broker.ALL_PLAYERS_TOP + Broker.RESULTS_TOP, Broker.DRAW_MSG);
         else
             broker.publish(Broker.ALL_PLAYERS_TOP + Broker.RESULTS_TOP, Broker.WINNER_MSG + Broker.DELIMITER + result);
-        broker.publish(Broker.ALL_PLAYERS_TOP + Broker.BOARD_TOP, getBoardLookMsg("NOONE"));
+        broker.publish(Broker.ALL_PLAYERS_TOP + Broker.BOARD_TOP, getBoardLookMsg("NO-ONE"));
         broker.publish(Broker.ALL_PLAYERS_TOP + Broker.PREPARE_TOP, Broker.RESTART_REQUEST_MSG);
     }
 
