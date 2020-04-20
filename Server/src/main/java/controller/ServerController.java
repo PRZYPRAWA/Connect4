@@ -39,8 +39,6 @@ public class ServerController implements MqttCallback {
             if (textMessage.contains(Broker.CLIENT_CONNECTED_MSG))
                 dontNeedMoreClients(topic);
         }
-
-
     }
 
     private boolean messageFromPlayer(String topic, char player) {
@@ -158,9 +156,14 @@ public class ServerController implements MqttCallback {
             else restartGame(); //both player confirm restart request
         } else {
             broker.publish(Broker.ALL_PLAYERS_TOP + Broker.RESULTS_TOP, Broker.END_GAME);
-            System.out.println("Server is down");
-            System.exit(0);
+            clearGame();
         }
+    }
+
+    private void clearGame() {
+        inGameClients.clear();
+        gameLogic.restartGame();
+        atLeastOnePlayerWantRestart = false;
     }
 
     private void restartGame() {

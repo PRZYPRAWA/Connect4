@@ -177,9 +177,10 @@ public class GameCli {
         consoleIn.nextLine();
     }
 
-    public void printWaitingForPlayers() {
+    public void printWaitingForPlayers(boolean withLobbyText) {
         consoleOut.println(BLUE + getBoardFooter() + RESET);
-        printlnCentered("LOBBY", WHITE_BOLD);
+        if (withLobbyText)
+            printlnCentered("LOBBY", WHITE_BOLD);
         printlnCentered("Waiting for another player...", FIRST_PLAYER_COLOR);
         consoleOut.println(BLUE + getBoardFooter() + RESET);
     }

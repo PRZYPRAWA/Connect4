@@ -104,7 +104,7 @@ public class ClientController implements MqttCallback {
     private void preparationTopicMsg(String message) {
         switch (message) {
             case Broker.WAITING_FOR_PLAYER_MSG:
-                gameCli.printWaitingForPlayers();
+                gameCli.printWaitingForPlayers(true);
                 break;
             case Broker.START_GAME:
                 gameCli.printStartedMsg();
@@ -112,6 +112,8 @@ public class ClientController implements MqttCallback {
             case Broker.RESTART_REQUEST_MSG: {
                 boolean restart = gameCli.restartGameInput();
                 String restartReplyMsg = Broker.RESTART_REPLY_MSG + Broker.DELIMITER + restart;
+                if (restart)
+                    gameCli.printWaitingForPlayers(false);
                 broker.publish(broker.getPlayerTopic() + Broker.PREPARE_TOP, restartReplyMsg);
             }
             break;
