@@ -211,4 +211,11 @@ public class GameCli {
         printlnCentered("Other players already in game", WHITE_BOLD);
         consoleOut.println(BLUE + getBoardFooter() + RESET);
     }
+
+    public String readServerID() {
+        printCentered("Server ID: ", AUTHORS_COLOR);
+        String serverID = consoleIn.nextLine();
+        consoleOut.println();
+        return serverID;
+    }
 }

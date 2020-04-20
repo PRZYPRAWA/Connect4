@@ -13,6 +13,7 @@ public class Broker {
     public static final int QoS = 1;
 
     public static final String DELIMITER = ":";
+    private static final String SERVER_ID_PREFIX = "serv";
 
     //messages: field
     public static final String WRONG_COLUMN_MSG = "WRONG_COLUMN";
@@ -57,7 +58,7 @@ public class Broker {
             broker = new MqttClient(Broker.SERVER_URI, MqttClient.generateClientId(), new MemoryPersistence());
             broker.setCallback(callback);
             broker.connect();
-            broker.subscribe(Broker.SPECIF_PLAYER_TOP + "#", Broker.QoS); //all topics from player
+            broker.subscribe(getServerId() + "/" + Broker.SPECIF_PLAYER_TOP + "#", Broker.QoS); //all topics from player
         } catch (MqttException e) {
             criticalErrorAction("Can't connect with MQTT: " + e.getMessage());
         }
@@ -71,10 +72,14 @@ public class Broker {
 
     public void publish(String topic, String message) {
         try {
-            broker.publish(topic, message.getBytes(UTF_8), Broker.QoS, false);
+            broker.publish(getServerId() + "/" + topic, message.getBytes(UTF_8), Broker.QoS, false);
         } catch (MqttException e) {
             System.err.println("Error while publishing message via MQTT protocol: " + e.getMessage());
             System.exit(1);
         }
+    }
+
+    public String getServerId() {
+        return SERVER_ID_PREFIX + broker.getClientId();
     }
 }

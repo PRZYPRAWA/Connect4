@@ -26,7 +26,8 @@ public class ServerController implements MqttCallback {
     //----------------------------------------------------------------------------------------------------------------//
     public void run() {
         broker.connect(this);
-        System.out.println("Server is running now...");
+        System.out.println("Server is running now...\n");
+        System.out.println("SERVER ID: " + broker.getServerId());
     }
 
     @Override
@@ -35,7 +36,6 @@ public class ServerController implements MqttCallback {
         if (messageFromPlayer(topic, getCurrentPlayer()) || needToReadMessageFromAll())
             checkMessage(topic, textMessage);
         else if (!messageFromPlayer(topic, gameLogic.getNextPlayer())) {
-            System.out.println(message);
             if (textMessage.contains(Broker.CLIENT_CONNECTED_MSG))
                 dontNeedMoreClients(topic);
         }

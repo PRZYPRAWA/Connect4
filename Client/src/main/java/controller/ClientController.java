@@ -24,7 +24,8 @@ public class ClientController implements MqttCallback {
 
     //----------------------------------------------------------------------------------------------------------------//
     public void startGame() {
-        broker.connect(this);
+        String serverID = gameCli.readServerID();
+        broker.connect(this, serverID);
         String connectMsg = Broker.CLIENT_CONNECTED_MSG + Broker.DELIMITER + broker.getClientId();
         broker.publish(broker.getPlayerTopic() + Broker.PREPARE_TOP, connectMsg);
     }

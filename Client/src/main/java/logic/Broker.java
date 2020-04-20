@@ -52,16 +52,17 @@ public class Broker {
 
     //----------------------------------------------------------------------------------------------------------------//
     private IMqttClient broker;
+    private GameCli gameCli;
+    private String serverID = "unknown";
 
     //----------------------------------------------------------------------------------------------------------------//
-    GameCli gameCli;
-
     public Broker(GameCli gameCli) {
         this.gameCli = gameCli;
     }
 
     //----------------------------------------------------------------------------------------------------------------//
-    public void connect(MqttCallback callback) {
+    public void connect(MqttCallback callback, String serverID) {
+        this.serverID = serverID;
         try {
             broker = new MqttClient(Broker.SERVER_URI, MqttClient.generateClientId(), new MemoryPersistence());
             broker.setCallback(callback);
@@ -74,8 +75,8 @@ public class Broker {
 
     private void subscribeTopics() {
         try {
-            broker.subscribe(SPECIF_PLAYER_TOP + getClientId() + "/#");
-            broker.subscribe(ALL_PLAYERS_TOP + "#");
+            broker.subscribe(serverID + "/" + SPECIF_PLAYER_TOP + getClientId() + "/#");
+            broker.subscribe(serverID + "/" + ALL_PLAYERS_TOP + "#");
         } catch (MqttException e) {
             criticalErrorAction("Error while subscribing messages via MQTT protocol: " + e.getMessage());
         }
@@ -89,7 +90,7 @@ public class Broker {
 
     public void publish(String topic, String message) {
         try {
-            broker.publish(topic, message.getBytes(UTF_8), Broker.QoS, false);
+            broker.publish(serverID + "/" + topic, message.getBytes(UTF_8), Broker.QoS, false);
         } catch (MqttException e) {
             System.err.println("Error while publishing message via MQTT protocol: " + e.getMessage());
         }
