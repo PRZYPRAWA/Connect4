@@ -20,12 +20,14 @@ public class Broker {
     public static final String FIELD_REQUEST_MSG = "FIELD_REQUEST";
     public static final String FIELD_CHOOSE_MSG = "FIELD_CHOOSE";
     public static final String WAITING_FOR_PLAYER_MSG = "WAITING_FOR_PLAYER";
+    public static final String OPPONENT_MOVE_MSG = "WAITING_FOR_OPPONENT_MOVE";
 
     //messages: preparation
     public static final String RESTART_REQUEST_MSG = "RESTART_REQUEST";
     public static final String RESTART_REPLY_MSG = "RESTART_REPLY";
     public static final String CLIENT_CONNECTED_MSG = "CLIENT_CONNECTED";
     public static final String START_GAME = "START_GAME";
+    public static final String OTHER_PLAYERS_IN_GAME = "OTHER_PLAYERS_ALREADY_IN_GAME";
 
     //messages: results
     public static final String DRAW_MSG = "DRAW";

@@ -29,6 +29,9 @@ public class Board {
     }
 
     public int getLastDiscRow() {
+        if (lastColumnDropIndex<0||lastColumnDropIndex>COLUMNS-1)
+            return -1;
+
         for (int i = ROWS - 1; i >= 0; i--) {
             if (board[i][lastColumnDropIndex] != ConnectFour.EMPTY)
                 return ROWS - i - 1;

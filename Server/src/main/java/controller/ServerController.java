@@ -34,11 +34,13 @@ public class ServerController implements MqttCallback {
         String textMessage = message.toString();
         if (messageFromPlayer(topic, getCurrentPlayer()) || needToReadMessageFromAll())
             checkMessage(topic, textMessage);
-        else if (messageFromPlayer(topic, gameLogic.getNextPlayer())) {
-            //powiadomienie zeby czekal spokojnie na swoja kolej todo
-        } else {
-            //powiadomienie ze juz jest 2 graczy todo
+        else if (!messageFromPlayer(topic, gameLogic.getNextPlayer())) {
+            System.out.println(message);
+            if (textMessage.contains(Broker.CLIENT_CONNECTED_MSG))
+                dontNeedMoreClients(topic);
         }
+
+
     }
 
     private boolean messageFromPlayer(String topic, char player) {
@@ -66,6 +68,43 @@ public class ServerController implements MqttCallback {
             broker.publish(getPlayerTopic(getCurrentPlayer()) + Broker.FIELD_TOP, Broker.WRONG_COLUMN_MSG);
             publishBoardWithFieldMsg(getCurrentPlayer());
         }
+    }
+
+    private void nextTurn(int col) {
+        try {
+            gameLogic.dropDisc(col, getCurrentPlayer());
+        } catch (FullColumnException e) {
+            broker.publish(getPlayerTopic(getCurrentPlayer()) + Broker.FIELD_TOP, Broker.FULL_COLUMN_MSG);
+            publishBoardWithFieldMsg(getCurrentPlayer());
+            return;
+        } catch (WrongColumnOrRowException e) {
+            broker.publish(getPlayerTopic(getCurrentPlayer()) + Broker.FIELD_TOP, Broker.WRONG_COLUMN_MSG);
+            publishBoardWithFieldMsg(getCurrentPlayer());
+            return;
+        }
+        checkGameStatus();
+    }
+
+    private void checkGameStatus() {
+        char result = gameLogic.getResult();
+        if (result != ConnectFour.EMPTY)
+            finishedCurrentGame(result);
+        else {
+            String nextPlayer = Character.toString(gameLogic.getNextPlayer());
+            broker.publish(Broker.ALL_PLAYERS_TOP + Broker.BOARD_TOP, getBoardLookMsg(nextPlayer));
+            broker.publish(getPlayerTopic(getCurrentPlayer()) + Broker.FIELD_TOP, Broker.OPPONENT_MOVE_MSG);
+            gameLogic.changePlayer();
+            broker.publish(getPlayerTopic(getCurrentPlayer()) + Broker.FIELD_TOP, Broker.FIELD_REQUEST_MSG);
+        }
+    }
+
+    private void finishedCurrentGame(char result) {
+        if (result == ConnectFour.DRAW)
+            broker.publish(Broker.ALL_PLAYERS_TOP + Broker.RESULTS_TOP, Broker.DRAW_MSG);
+        else
+            broker.publish(Broker.ALL_PLAYERS_TOP + Broker.RESULTS_TOP, Broker.WINNER_MSG + Broker.DELIMITER + result);
+        broker.publish(Broker.ALL_PLAYERS_TOP + Broker.BOARD_TOP, getBoardLookMsg("NO-ONE"));
+        broker.publish(Broker.ALL_PLAYERS_TOP + Broker.PREPARE_TOP, Broker.RESTART_REQUEST_MSG);
     }
 
     private void publishBoardWithFieldMsg(char player) {
@@ -105,6 +144,7 @@ public class ServerController implements MqttCallback {
             gameLogic.changePlayer();
         } else {
             broker.publish(Broker.ALL_PLAYERS_TOP + Broker.BOARD_TOP, getBoardLookMsg(Character.toString(getCurrentPlayer())));
+            broker.publish(getPlayerTopic(gameLogic.getNextPlayer()) + Broker.FIELD_TOP, Broker.OPPONENT_MOVE_MSG);
             broker.publish(getPlayerTopic(getCurrentPlayer()) + Broker.FIELD_TOP, Broker.FIELD_REQUEST_MSG);
         }
     }
@@ -131,40 +171,10 @@ public class ServerController implements MqttCallback {
         broker.publish(getPlayerTopic(getCurrentPlayer()) + Broker.FIELD_TOP, Broker.FIELD_REQUEST_MSG);
     }
 
-    private void nextTurn(int col) {
-        try {
-            gameLogic.dropDisc(col, getCurrentPlayer());
-        } catch (FullColumnException e) {
-            broker.publish(getPlayerTopic(getCurrentPlayer()) + Broker.FIELD_TOP, Broker.FULL_COLUMN_MSG);
-            publishBoardWithFieldMsg(getCurrentPlayer());
-            return;
-        } catch (WrongColumnOrRowException e) {
-            broker.publish(getPlayerTopic(getCurrentPlayer()) + Broker.FIELD_TOP, Broker.WRONG_COLUMN_MSG);
-            publishBoardWithFieldMsg(getCurrentPlayer());
-            return;
-        }
-        checkGameStatus();
-    }
-
-    private void checkGameStatus() {
-        char result = gameLogic.getResult();
-        if (result != ConnectFour.EMPTY)
-            finishedCurrentGame(result);
-        else {
-            String nextPlayer = Character.toString(gameLogic.getNextPlayer());
-            broker.publish(Broker.ALL_PLAYERS_TOP + Broker.BOARD_TOP, getBoardLookMsg(nextPlayer));
-            gameLogic.changePlayer();
-            broker.publish(getPlayerTopic(getCurrentPlayer()) + Broker.FIELD_TOP, Broker.FIELD_REQUEST_MSG);
-        }
-    }
-
-    private void finishedCurrentGame(char result) {
-        if (result == ConnectFour.DRAW)
-            broker.publish(Broker.ALL_PLAYERS_TOP + Broker.RESULTS_TOP, Broker.DRAW_MSG);
-        else
-            broker.publish(Broker.ALL_PLAYERS_TOP + Broker.RESULTS_TOP, Broker.WINNER_MSG + Broker.DELIMITER + result);
-        broker.publish(Broker.ALL_PLAYERS_TOP + Broker.BOARD_TOP, getBoardLookMsg("NO-ONE"));
-        broker.publish(Broker.ALL_PLAYERS_TOP + Broker.PREPARE_TOP, Broker.RESTART_REQUEST_MSG);
+    private void dontNeedMoreClients(String topic) {
+        String playerID = topic.split("/")[2];
+        String topPrefix = Broker.SPECIF_PLAYER_TOP + playerID + "/";
+        broker.publish(topPrefix + Broker.PREPARE_TOP, Broker.OTHER_PLAYERS_IN_GAME);
     }
 
     public char getCurrentPlayer() {

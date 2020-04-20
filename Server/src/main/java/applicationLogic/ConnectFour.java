@@ -81,6 +81,9 @@ public class ConnectFour {
         int lastRow = board.getLastDiscRow();
         int lastCol = board.getLastDiscColumn();
 
+        if (lastRow < 0 || lastCol < 0)
+            return false;
+
         for (int i = lastCol; i < Board.COLUMNS; i++) {
             if (board.getSign(lastRow, i) == player)
                 discAmount++;
@@ -96,6 +99,8 @@ public class ConnectFour {
     }
 
     private boolean isVertical(char player) {
+        if (board.getLastDiscRow() < 0)
+            return false;
         int discAmount = 0;
         for (int i = board.getLastDiscRow(); i < Board.ROWS; i++) {
             if (board.getSign(i, board.getLastDiscColumn()) == player)
@@ -111,6 +116,8 @@ public class ConnectFour {
 
     private boolean isDiagonal(char player, boolean isRight) {
         int actualRow = board.getLastDiscRow();
+        if (actualRow < 0)
+            return false;
         int discsAmount = 0;
 
         Predicate<Integer> condition = row -> row >= 0 && row < Board.ROWS;

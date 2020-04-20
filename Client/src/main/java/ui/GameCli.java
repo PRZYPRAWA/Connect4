@@ -4,6 +4,9 @@ import controller.ClientController;
 
 import static ui.ConsoleColors.*;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.Scanner;
 
@@ -175,7 +178,15 @@ public class GameCli {
     }
 
     public void printWaitingForPlayers() {
-        printlnCentered("Lobby: waiting for another player to start a game...", FIRST_PLAYER_COLOR);
+        consoleOut.println(BLUE + getBoardFooter() + RESET);
+        printlnCentered("LOBBY", WHITE_BOLD);
+        printlnCentered("Waiting for another player...", FIRST_PLAYER_COLOR);
+        consoleOut.println(BLUE + getBoardFooter() + RESET);
+    }
+
+    public void printOpponentTurn() {
+        printlnCentered("Opponent move...", FIRST_PLAYER_COLOR);
+        consoleOut.println();
     }
 
     public void printEndGame() {
@@ -190,5 +201,13 @@ public class GameCli {
         printlnCentered("Lukasz Gajerski (www.github.com/Ukasz09)", AUTHORS_COLOR);
         printlnCentered("Pawel Piotrowski (www.github.com/PRZYPRAWA)", AUTHORS_COLOR);
         consoleOut.println();
+    }
+
+    public void printOtherPlayersInGame() {
+        consoleOut.println(BLUE + getBoardFooter() + RESET);
+        printlnCentered("LOBBY", WHITE_BOLD);
+        printlnCentered("Can't join", WHITE_BOLD, RED_BACKGROUND);
+        printlnCentered("Other players already in game", WHITE_BOLD);
+        consoleOut.println(BLUE + getBoardFooter() + RESET);
     }
 }

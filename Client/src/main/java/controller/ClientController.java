@@ -4,8 +4,13 @@ import logic.Broker;
 import org.eclipse.paho.client.mqttv3.*;
 import ui.GameCli;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Scanner;
+
 public class ClientController implements MqttCallback {
-    public final static char FIRST_PLAYER_SIGN = 'X', SECOND_PLAYER_SIGN = 'Q', DRAW_SIGN = 'd'; //EMPTY = 'o',
+    public final static char FIRST_PLAYER_SIGN = 'X', SECOND_PLAYER_SIGN = 'Q';
 
     private String actualPlayerTurn = "NO-ONE";
     private GameCli gameCli;
@@ -78,6 +83,9 @@ public class ClientController implements MqttCallback {
             case Broker.FULL_COLUMN_MSG:
                 gameCli.printFullColumnError();
                 break;
+            case Broker.OPPONENT_MOVE_MSG:
+                gameCli.printOpponentTurn();
+                break;
         }
     }
 
@@ -94,14 +102,24 @@ public class ClientController implements MqttCallback {
     }
 
     private void preparationTopicMsg(String message) {
-        if (message.equals(Broker.WAITING_FOR_PLAYER_MSG))
-            gameCli.printWaitingForPlayers();
-        else if (message.equals(Broker.START_GAME))
-            gameCli.printStartedMsg();
-        else if (message.equals(Broker.RESTART_REQUEST_MSG)) {
-            boolean restart = gameCli.restartGameInput();
-            String restartReplyMsg = Broker.RESTART_REPLY_MSG + Broker.DELIMITER + restart;
-            broker.publish(broker.getPlayerTopic() + Broker.PREPARE_TOP, restartReplyMsg);
+        switch (message) {
+            case Broker.WAITING_FOR_PLAYER_MSG:
+                gameCli.printWaitingForPlayers();
+                break;
+            case Broker.START_GAME:
+                gameCli.printStartedMsg();
+                break;
+            case Broker.RESTART_REQUEST_MSG: {
+                boolean restart = gameCli.restartGameInput();
+                String restartReplyMsg = Broker.RESTART_REPLY_MSG + Broker.DELIMITER + restart;
+                broker.publish(broker.getPlayerTopic() + Broker.PREPARE_TOP, restartReplyMsg);
+            }
+            break;
+            case Broker.OTHER_PLAYERS_IN_GAME: {
+                gameCli.printOtherPlayersInGame();
+                System.exit(0);
+            }
+            break;
         }
     }
 
