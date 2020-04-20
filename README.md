@@ -11,22 +11,25 @@ Online multiplayer connetion board game
 ## Rules
 https://en.wikipedia.org/wiki/Connect_Four
 
-## Screenshots TODO
-![win](https://raw.githubusercontent.com/Ukasz09/Connect4/master/readme_images/full.png)
-![full column](https://raw.githubusercontent.com/Ukasz09/Connect4/master/readme_images/wrong.png)
-![wrong column](https://raw.githubusercontent.com/Ukasz09/Connect4/master/readme_images/win.png)
+## Gameplay
+<p align="center"><img width=95% src="https://raw.githubusercontent.com/Ukasz09/Connect4/master/gameplay/gameplay.gif"></p>
+
+## Screenshots 
+![game screenshot](https://raw.githubusercontent.com/Ukasz09/Connect4/master/gameplay/game.png)
+![wrong column](https://raw.githubusercontent.com/Ukasz09/Connect4/master/gameplay/wrong.png)
+![win](https://raw.githubusercontent.com/Ukasz09/Connect4/master/gameplay/win.png)
 
 ## How to use it ?
-:zero:If you dont have installed MQTT on your PC run this command:
+:zero:  If you dont have installed MQTT on your PC run this command:
 
 ```bash
 pip install paho-mqtt
 ```
 or downlad it by using this link: https://mosquitto.org/download/ <br/>
 
-:one: Download at least `bin` subdirectories, both from `Server` and `Client` directory <br/>
+:one:  Download at least `bin` subdirectories, both from `Server` and `Client` directory <br/>
 
-:two: One of the players need to run a server:
+:two:  One of the players need to run a server:
 1) open directory `Server/bin`
 2) open one of the folders (`Linux` / `Windows`), in accordance with your Operating System:
 
@@ -45,7 +48,7 @@ Windows CMD not support ansi colors in console, so to run game properly, you nee
   	 - Open one of directory (`x64` and `x86`), in accordance with your system version
   	 - run `RunGame.bat` script 
 
-:three: Both players need to run a client application <br/>
+:three:  Both players need to run a client application <br/>
 1) open `Client/bin`
 2) Repeat steps similiary as for `Server` application (for Linux with command):
 
@@ -53,23 +56,21 @@ Windows CMD not support ansi colors in console, so to run game properly, you nee
 java -jar Client.jar
 ```
 
-:four: Enter server ID (from Server console) into both clients application <br/>
-:five: Enjoy the game! <br/>
+:four:  Enter server ID (from Server console) into both clients application <br/>
+:five:  Enjoy the game! <br/>
 
-`TIPS`
+### TIPS
 - If you don't see directories `x64` or `x86` inside `bin/Windows` after downloading it, or you have some other problems, try to disable `Windows Defender`, download directory again and repeat steps
 
 ---
 ## 📫 Authors
-<a href="https://github.com/Ukasz09" target="_blank"><img src="https://avatars0.githubusercontent.com/u/44710226?s=460&v=4" width="100px;"></a><br/>
 
-- game logic
-- UI (CLI)
-- EDA with MQTT
+| <a href="https://github.com/Ukasz09" target="_blank"><img src="https://avatars0.githubusercontent.com/u/44710226?s=460&v=4" width="100px;"></a> | <a href="https://github.com/PRZYPRAWA" target="_blank"><img src="https://avatars3.githubusercontent.com/u/30748558?s=460&v=4" width="100px;"></a> |
+| ------------- | ------------- |
+| game logic    | game logic    |
+| UI (CLI)      |   		|
+| EDA with MQTT |  		|
 
-<a href="https://github.com/PRZYPRAWA" target="_blank"><img src="https://avatars3.githubusercontent.com/u/30748558?s=460&v=4" width="100px;"></a><br/>
-
-- game logic
 
 <br/><br/>
 Feel free to contact with us. And hope you enjoy the game 😎
