@@ -202,6 +202,7 @@ public class GameCli {
         printlnCentered("Lukasz Gajerski (www.github.com/Ukasz09)", AUTHORS_COLOR);
         printlnCentered("Pawel Piotrowski (www.github.com/PRZYPRAWA)", AUTHORS_COLOR);
         consoleOut.println();
+        consoleIn.nextLine();
     }
 
     public void printOtherPlayersInGame() {

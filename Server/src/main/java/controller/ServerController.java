@@ -171,6 +171,7 @@ public class ServerController implements MqttCallback {
         atLeastOnePlayerWantRestart = false;
         broker.publish(Broker.ALL_PLAYERS_TOP + Broker.PREPARE_TOP, Broker.START_GAME);
         broker.publish(Broker.ALL_PLAYERS_TOP + Broker.BOARD_TOP, getBoardLookMsg(Character.toString(getCurrentPlayer())));
+        broker.publish(getPlayerTopic(gameLogic.getNextPlayer()) + Broker.FIELD_TOP, Broker.OPPONENT_MOVE_MSG);
         broker.publish(getPlayerTopic(getCurrentPlayer()) + Broker.FIELD_TOP, Broker.FIELD_REQUEST_MSG);
     }
 
