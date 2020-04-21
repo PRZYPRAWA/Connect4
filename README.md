@@ -31,7 +31,7 @@ or downlad it by using this link: https://mosquitto.org/download/ <br/>
 
 :two:  One of the players need to run a server:
 1) open directory `Server/bin`
-2) open one of the folders (`Linux` / `Windows`), in accordance with your Operating System:
+2) open one of the directories (`Linux` / `Windows`), according to your Operating System:
 
 - Linux
 
@@ -41,12 +41,12 @@ Open it by console with command:
 java -jar Server.jar
 ```
 
-- Windows
+- Windows <br/>
 Windows CMD not support ansi colors in console, so to run game properly, you need to do steps from a) OR b): <br/><br/>
   a) Open it using bash (e.g. `Git Bash`) identically as in Linux <br/>
   b) Open it using `CMD`: <br/>
-  	 - Open one of directory (`x64` and `x86`), in accordance with your system version
-  	 - run `RunGame.bat` script 
+  	 - Open one of directories (`x64` or `x86`), according to your system version
+  	 - run `RunGame.bat` script (just clik on it)
 
 :three:  Both players need to run a client application <br/>
 1) open `Client/bin`

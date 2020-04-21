@@ -15,6 +15,12 @@ public class Broker {
     public static final String DELIMITER = ":";
     private static final String SERVER_ID_PREFIX = "serv";
 
+    //fieldColors
+    public static final String FIRST_COLOR = "FIRST_PLAYER_COLOR";
+    public static final String SECOND_COLOR = "SECOND_PLAYER_COLOR";
+    public static final String SPECIAL_COLOR = "SPECIAL_PLAYER_COLOR";
+    public static final String EMPTY_COLOR = "EMPTY_COLOR";
+
     //messages: field
     public static final String WRONG_COLUMN_MSG = "WRONG_COLUMN";
     public static final String FULL_COLUMN_MSG = "FULL_COLUMN";

@@ -99,8 +99,10 @@ public class ServerController implements MqttCallback {
     private void finishedCurrentGame(char result) {
         if (result == ConnectFour.DRAW)
             broker.publish(Broker.ALL_PLAYERS_TOP + Broker.RESULTS_TOP, Broker.DRAW_MSG);
-        else
-            broker.publish(Broker.ALL_PLAYERS_TOP + Broker.RESULTS_TOP, Broker.WINNER_MSG + Broker.DELIMITER + result);
+        else {
+            String winnerMsg = Broker.WINNER_MSG + Broker.DELIMITER + result + Broker.DELIMITER + getSignColorMsg(result);
+            broker.publish(Broker.ALL_PLAYERS_TOP + Broker.RESULTS_TOP, winnerMsg);
+        }
         broker.publish(Broker.ALL_PLAYERS_TOP + Broker.BOARD_TOP, getBoardLookMsg("NO-ONE"));
         broker.publish(Broker.ALL_PLAYERS_TOP + Broker.PREPARE_TOP, Broker.RESTART_REQUEST_MSG);
     }
@@ -124,13 +126,31 @@ public class ServerController implements MqttCallback {
             broker.publish(getPlayerTopic(getCurrentPlayer()) + Broker.PREPARE_TOP, Broker.START_GAME);
     }
 
-    //rowsQty:columnsQty:playerTurn:sign1:sign2:sig3 ...
+    //rowsQty:columnsQty:playerTurn:playerColor:sign1:sign2:sig3...color1;color2;color3 ...
     private String getBoardLookMsg(String playerTurn) {
-        StringBuilder builder = new StringBuilder(Board.ROWS + Broker.DELIMITER + Board.COLUMNS + Broker.DELIMITER + playerTurn);
+        String initialMsg = Board.ROWS + Broker.DELIMITER + Board.COLUMNS + Broker.DELIMITER + playerTurn + Broker.DELIMITER + getSignColorMsg(playerTurn.charAt(0));
+        StringBuilder builder = new StringBuilder(initialMsg);
         for (int row = 0; row < Board.ROWS; row++)
             for (int col = 0; col < Board.COLUMNS; col++)
                 builder.append(Broker.DELIMITER).append(gameLogic.getBoard().getSign(row, col));
+        for (int row = 0; row < Board.ROWS; row++)
+            for (int col = 0; col < Board.COLUMNS; col++)
+                builder.append(Broker.DELIMITER).append(getSignColorMsg(row, col));
         return builder.toString();
+    }
+
+    private String getSignColorMsg(int row, int column) {
+        if (gameLogic.fieldInSpecialColor(row, column))
+            return Broker.SPECIAL_COLOR;
+        else return getSignColorMsg(gameLogic.getBoard().getSign(row, column));
+    }
+
+    private String getSignColorMsg(char playerSign) {
+        if (playerSign == ConnectFour.FIRST_PLAYER)
+            return Broker.FIRST_COLOR;
+        else if (playerSign == ConnectFour.SECOND_PLAYER)
+            return Broker.SECOND_COLOR;
+        else return Broker.EMPTY_COLOR;
     }
 
     private void processClientConnectedMsg(String message) {
