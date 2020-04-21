@@ -15,9 +15,9 @@ https://en.wikipedia.org/wiki/Connect_Four
 <p align="center"><img width=95% src="https://raw.githubusercontent.com/Ukasz09/Connect4/master/gameplay/gameplay.gif"></p>
 
 ## Screenshots 
-![game screenshot](https://raw.githubusercontent.com/Ukasz09/Connect4/master/gameplay/game.png)
-![wrong column](https://raw.githubusercontent.com/Ukasz09/Connect4/master/gameplay/wrong.png)
-![win](https://raw.githubusercontent.com/Ukasz09/Connect4/master/gameplay/win.png)
+![game screenshot](https://raw.githubusercontent.com/Ukasz09/Connect4/master/gameplay/game2.png)
+![wrong column](https://raw.githubusercontent.com/Ukasz09/Connect4/master/gameplay/wrong2.png)
+![win](https://raw.githubusercontent.com/Ukasz09/Connect4/master/gameplay/win2.png)
 
 ## How to use it ?
 :zero:  If you dont have installed MQTT on your PC run this command:
