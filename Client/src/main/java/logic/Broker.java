@@ -15,6 +15,12 @@ public class Broker {
 
     public static final String DELIMITER = ":";
 
+    //fieldColors
+    public static final String FIRST_COLOR = "FIRST_PLAYER_COLOR";
+    public static final String SECOND_COLOR = "SECOND_PLAYER_COLOR";
+    public static final String SPECIAL_COLOR = "SPECIAL_PLAYER_COLOR";
+    public static final String EMPTY_COLOR = "EMPTY_COLOR";
+
     //messages: field
     public static final String WRONG_COLUMN_MSG = "WRONG_COLUMN";
     public static final String FULL_COLUMN_MSG = "FULL_COLUMN";
@@ -34,8 +40,6 @@ public class Broker {
     public static final String DRAW_MSG = "DRAW";
     public static final String WINNER_MSG = "WINNER";
     public static final String END_GAME = "END_GAME";
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //topics prefixes
     private static final String SPECIF_PLAYER_TOP = "connect4/player/";

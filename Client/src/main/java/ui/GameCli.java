@@ -1,12 +1,9 @@
 package ui;
 
-import controller.ClientController;
+import logic.Broker;
 
 import static ui.ConsoleColors.*;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.Scanner;
 
@@ -15,6 +12,8 @@ public class GameCli {
     public static final String COLUMN_IS_FULL_MSG = "COLUMN IS FULL", WRONG_COLUMN_MSG = "WRONG COLUMN";
     private static final String FIRST_PLAYER_COLOR = BLACK_BOLD + BLUE_BACKGROUND;
     private static final String SECOND_PLAYER_COLOR = BLACK_BOLD + YELLOW_BACKGROUND;
+    private static final String SPECIAL_FIELD_COLOR = WHITE_BOLD + RED_BACKGROUND;
+    private static final String NO_COLOR = " ";
     private static final String BOARD_COLOR = BLACK_BOLD + GREEN_BACKGROUND;
     private static final String INPUT_COLOR = PURPLE_BRIGHT;
     private static final String CREDITS_COLOR = BLACK_BOLD + CYAN_BACKGROUND;
@@ -49,24 +48,36 @@ public class GameCli {
         printlnCentered(WRONG_COLUMN_MSG, RED_BOLD);
     }
 
-    public void printBoard(char[][] board) {
-        for (int row = 0; row < board.length; row++) {
+    public void printBoard(String[][] boardSigns, String[][] boardColorsMsg) {
+        for (int row = 0; row < boardSigns.length; row++) {
             consoleOut.print(BOARD_COLOR + COLUMN_DELIMITER + BOARD_MIDDLE_FRAME + RESET);
-            for (int col = 0; col < board[row].length; col++) {
+            for (int col = 0; col < boardSigns[row].length; col++) {
                 consoleOut.print(COLUMN_DELIMITER);
-                printBoardSign(board[row][col]);
+                printBoardSign(boardSigns[row][col].charAt(0), boardColorsMsg[row][col]);
             }
             consoleOut.println(COLUMN_DELIMITER + BOARD_COLOR + BOARD_MIDDLE_FRAME + COLUMN_DELIMITER + RESET);
         }
         printBoardFooter();
     }
 
-    private void printBoardSign(char sign) {
-        if (sign == ClientController.FIRST_PLAYER_SIGN)
-            consoleOut.print(FIRST_PLAYER_COLOR + sign + RESET);
-        else if (sign == ClientController.SECOND_PLAYER_SIGN)
-            consoleOut.print(SECOND_PLAYER_COLOR + sign + RESET);
-        else consoleOut.print(" ");
+    private void printBoardSign(char sign, String colorMsg) {
+        String signColor = getSignColor(colorMsg);
+        if (signColor.equals(NO_COLOR))
+            consoleOut.print(NO_COLOR);
+        else consoleOut.print(signColor + sign + RESET);
+    }
+
+    private String getSignColor(String colorMsg) {
+        switch (colorMsg) {
+            case Broker.EMPTY_COLOR:
+                return NO_COLOR;
+            case Broker.FIRST_COLOR:
+                return FIRST_PLAYER_COLOR;
+            case Broker.SECOND_COLOR:
+                return SECOND_PLAYER_COLOR;
+            default:
+                return SPECIAL_FIELD_COLOR;
+        }
     }
 
     private void printBoardFooter() {
@@ -108,14 +119,14 @@ public class GameCli {
         }
     }
 
-    public void printActualTurn(String actualPlayerSign) {
+    public void printActualTurn(String actualPlayerSign, String colorMsg) {
         consoleOut.println(BLUE + getBoardFooter() + RESET);
         printCentered("Player turn: ", WHITE);
         if (actualPlayerSign.length() > 1) {
             consoleOut.println();
             printCentered(actualPlayerSign, CYAN_BOLD);
         } else
-            printBoardSign(actualPlayerSign.charAt(0));
+            printBoardSign(actualPlayerSign.charAt(0), colorMsg);
         consoleOut.println();
         consoleOut.println(BLUE + getBoardFooter() + RESET);
         consoleOut.println();
@@ -125,10 +136,10 @@ public class GameCli {
         printlnCentered("Unlucky. It's a draw", YELLOW_BOLD);
     }
 
-    public void printWinnerMsg(char winner) {
+    public void printWinnerMsg(char winner, String colorMsg) {
         consoleOut.println();
         printCentered("Congratulations. Winner is player: ", GREEN_BOLD);
-        printBoardSign(winner);
+        printBoardSign(winner, colorMsg);
         consoleOut.println("\n" + getBoardFooter());
     }
 
@@ -202,6 +213,7 @@ public class GameCli {
         printlnCentered("Lukasz Gajerski (www.github.com/Ukasz09)", AUTHORS_COLOR);
         printlnCentered("Pawel Piotrowski (www.github.com/PRZYPRAWA)", AUTHORS_COLOR);
         consoleOut.println();
+        printlnCentered("Press any button to exit...", WHITE);
         consoleIn.nextLine();
     }
 
